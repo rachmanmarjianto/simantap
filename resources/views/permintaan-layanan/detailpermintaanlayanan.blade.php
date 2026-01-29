@@ -63,7 +63,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">Nama Layanan</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{ $permintaan_layanan->nama_layanan }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $permintaan_layanan->nama_layanan }} - {{ $permintaan_layanan->detail_layanan }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -109,10 +109,8 @@
                                             <th>No Urut</th>
                                             <th>Kode Aset</th>
                                             <th>Nama</th>
-                                            <th>Merk</th>
                                             <th>Ruang</th>
                                             <th>Lama Penggunaan</th>
-                                            <th>Waktu Mulai / Akhir</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -120,70 +118,76 @@
                                             $i=0;
                                         @endphp
                                         @foreach($alat_lab as $al)
-                                            <tr>
+                                            <tr @if($i%2 == 0) style="background-color: #f3f3f3;" @endif>
                                                 <td rowspan="2">
                                                     {{ $al->no_urut }}
                                                     <input type="hidden" name="idpermintaan_layanan[{{ $i }}]" value="{{ $al->idpermintaan_layanan }}">
                                                     <input type="hidden" name="kode_barang_aset[{{ $i }}]" value="{{ $al->kode_barang_aset }}">
                                                 </td>
-                                                <td rowspan="2">{{ $al->kode_barang_aset }}</td>
-                                                <td rowspan="2">{{ $al->nama_barang }}</td>
-                                                <td rowspan="2">{{ $al->merk_barang }}</td>
-                                                <td rowspan="2">{{ $al->nama_ruang }}</td>
-                                                <td rowspan="2" id="lamapeng-{{ $al->kode_barang_aset }}"></td>
-                                                <td>
-                                                    <div class="input-group" >
-                                                        @if((!array_key_exists($al->kode_barang_aset, $timestamp_alat) || empty($timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'])) && $permintaan_layanan->status != '3')
-                                                            <span class="input-group-btn" id="btnmulai-{{ $al->kode_barang_aset }}">
-                                                                <button type="button" id="check-minutes" class="btn waves-effect waves-light btn-ft btn-success" onclick="getts(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})"><i class="fa fa-clock-o" aria-hidden="true"></i></button>
-                                                            </span>
-
-                                                        @else
-                                                            <button type="button" class="btn btn-outline-success">Awal</button>
-                                                        @endif
-                                                        <input type="text" id="mulai-{{ $al->kode_barang_aset }}" name="ts_mulai[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'] ?? '' }}">
-                                                        <span class="input-group-btn" >
-                                                            <button type="button" id="btn-simpan-awal-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
-                                                                @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
-                                                                    @if(!empty($timestamp_alat[$al->kode_barang_aset]['timestamp_mulai']))
-                                                                        <i class="fa fa-check" aria-hidden="true"></i>
-                                                                    @else
-                                                                        <i class="fa fa-save"></i>
-                                                                    @endif
-                                                                @else                                                                    
-                                                                    <i class="fa fa-save"></i>
-                                                                @endif
-                                                            </button>
-                                                        </span>
-                                                    </div>
-                                                </td>
+                                                <td rowspan="1">{{ $al->kode_barang_aset }}</td>
+                                                <td rowspan="1">{{ $al->nama_barang }} {{ $al->merk_barang }}</td>
+                                                <td rowspan="1">{{ $al->nama_ruang }}</td>
+                                                <td rowspan="1" id="lamapeng-{{ $al->kode_barang_aset }}"></td>
                                             </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="input-group" >
-                                                        @if((!array_key_exists($al->kode_barang_aset, $timestamp_alat) || empty($timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'])) && $permintaan_layanan->status != '3')                                                            
-                                                            <span class="input-group-btn" id="btnakhir-{{ $al->kode_barang_aset }}">
-                                                                <button type="button" id="check-minutes" class="btn waves-effect waves-light btn-ft btn-danger" onclick="getts(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})"><i class="fa fa-clock-o" aria-hidden="true"></i></button>
-                                                            </span>
-                                                        @else
-                                                            <button type="button" class="btn btn-outline-danger">Akhir</button>                                                        
-                                                        @endif
-                                                        <input type="text" name="ts_akhir[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'] ?? '' }}" id="akhir-{{ $al->kode_barang_aset }}" >
-                                                        <span class="input-group-btn" >
-                                                            <button type="button" id="btn-simpan-akhir-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
-                                                                @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
-                                                                    @if(!empty($timestamp_alat[$al->kode_barang_aset]['timestamp_akhir']))
-                                                                        <i class="fa fa-check" aria-hidden="true"></i>
-                                                                    @else
-                                                                        <i class="fa fa-save"></i>
-                                                                    @endif
-                                                                @else                                                                    
-                                                                    <i class="fa fa-save"></i>
+                                            <tr @if($i%2 == 0) style="background-color: #f3f3f3;" @endif>
+                                                <td colspan="4" style="padding: 0">
+                                                    <table width="100%" style="border: none;">
+                                                    <tr>
+                                                        <td >
+                                                            <div class="input-group" >
+                                                                @if((!array_key_exists($al->kode_barang_aset, $timestamp_alat) || empty($timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'])) && $permintaan_layanan->status != '3')
+                                                                    <span class="input-group-btn" id="btnmulai-{{ $al->kode_barang_aset }}">
+                                                                        <button type="button" id="check-minutes" class="btn waves-effect waves-light btn-ft btn-success" onclick="getts(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})"><i class="fa fa-clock-o" aria-hidden="true"></i></button>
+                                                                    </span>
+
+                                                                @else
+                                                                    <button type="button" class="btn btn-outline-success">Awal</button>
                                                                 @endif
-                                                            </button>
-                                                        </span>
-                                                    </div>
+                                                                <input type="text" id="mulai-{{ $al->kode_barang_aset }}" name="ts_mulai[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'] ?? '' }}" onchange="simpan(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
+                                                                <span class="input-group-btn" >
+                                                                    <button type="button" id="btn-simpan-awal-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
+                                                                        @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
+                                                                            @if(!empty($timestamp_alat[$al->kode_barang_aset]['timestamp_mulai']))
+                                                                                <i class="fa fa-check" aria-hidden="true"></i>
+                                                                            @else
+                                                                                <i class="fa fa-save"></i>
+                                                                            @endif
+                                                                        @else                                                                    
+                                                                            <i class="fa fa-save"></i>
+                                                                        @endif
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td >
+                                                            <div class="input-group" >
+                                                                @if((!array_key_exists($al->kode_barang_aset, $timestamp_alat) || empty($timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'])) && $permintaan_layanan->status != '3')                                                            
+                                                                    <span class="input-group-btn" id="btnakhir-{{ $al->kode_barang_aset }}">
+                                                                        <button type="button" id="check-minutes" class="btn waves-effect waves-light btn-ft btn-danger" onclick="getts(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})"><i class="fa fa-clock-o" aria-hidden="true"></i></button>
+                                                                    </span>
+                                                                @else
+                                                                    <button type="button" class="btn btn-outline-danger">Akhir</button>                                                        
+                                                                @endif
+                                                                <input type="text" name="ts_akhir[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'] ?? '' }}" id="akhir-{{ $al->kode_barang_aset }}" onchange="simpan(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
+                                                                <span class="input-group-btn" >
+                                                                    <button type="button" id="btn-simpan-akhir-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
+                                                                        @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
+                                                                            @if(!empty($timestamp_alat[$al->kode_barang_aset]['timestamp_akhir']))
+                                                                                <i class="fa fa-check" aria-hidden="true"></i>
+                                                                            @else
+                                                                                <i class="fa fa-save"></i>
+                                                                            @endif
+                                                                        @else                                                                    
+                                                                            <i class="fa fa-save"></i>
+                                                                        @endif
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </table>
                                                 </td>
+                                                
                                             </tr>
 
                                             @php
@@ -347,7 +351,7 @@
             let $btnsave = type === 1 ? $('#btn-simpan-awal-' + kode_barang_aset) : $('#btn-simpan-akhir-' + kode_barang_aset);
             $btnsave.html('<i class="fa fa-spinner fa-spin"></i>');
 
-            console.log(ts);
+            // console.log(ts);
 
             $.ajax({
                 url: "{{ route('permintaanlayanan_save_ts_admin') }}",

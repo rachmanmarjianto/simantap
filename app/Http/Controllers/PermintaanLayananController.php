@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
 use Jenssegers\Agent\Agent;
+use Carbon\Carbon;
 
 class PermintaanLayananController extends Controller
 {
@@ -48,27 +49,60 @@ class PermintaanLayananController extends Controller
 			$waktu_akhir = $tgl_akhir.' 23:59:59';
 		}
 		
-
-		$permintaan_layanan = DB::table('permintaan_layanan as pl')
+		if(session('userdata')['idrole'] == 4){
+			$permintaan_layanan = DB::table('permintaan_layanan as pl')
 								->join('layanan as l', 'pl.idlayanan', '=', 'l.idlayanan')
 								->join('operator_layanan as ol', 'pl.idlayanan', '=', 'ol.idlayanan')
-								->select('pl.*', 'l.nama_layanan', 'l.idunit_kerja')
+								->join('layanan_aset as la', 'pl.idlayanan', '=', 'la.idlayanan')
+								->join('aset as a', 'la.kode_barang_aset', '=', 'a.kode_barang_aset')
+								->join('pj_ruang as pr', 'a.idruang', '=', 'pr.idruang')
+								->select('pl.idpermintaan_layanan', 'pl.idlayanan', 'pl.created_at', 'pl.status', 'pl.idlayanan_aplikasi_asal', 'pl.detail_layanan', 'pl.ts_req_masuk_aplikasi_asal', 
+											'l.nama_layanan', 'l.idunit_kerja')
+								->where('pl.ts_req_masuk_aplikasi_asal', '>=' ,'\''.$waktu_awal.'\'')
+								->where('pl.ts_req_masuk_aplikasi_asal', '<=' ,'\''.$waktu_akhir.'\'')
+								->where('pr.iduser', session('userdata')['iduser'])
+								->where('pr.status', true)
+								->where('ol.is_deleted', false)
+								->orderBy('pl.created_at', 'desc')
+								->groupBy('pl.idpermintaan_layanan', 'pl.idlayanan', 'pl.created_at', 'pl.status', 'pl.idlayanan_aplikasi_asal', 'pl.detail_layanan', 'pl.ts_req_masuk_aplikasi_asal',
+											'l.nama_layanan', 'l.idunit_kerja')
+								->get();
+
+								// dd('hallo');
+		}
+		else{
+			$permintaan_layanan = DB::table('permintaan_layanan as pl')
+								->join('layanan as l', 'pl.idlayanan', '=', 'l.idlayanan')
+								->join('operator_layanan as ol', 'pl.idlayanan', '=', 'ol.idlayanan')
+								->select('pl.idpermintaan_layanan', 'pl.idlayanan', 'pl.created_at', 'pl.status', 'pl.idlayanan_aplikasi_asal', 'pl.detail_layanan', 'pl.ts_req_masuk_aplikasi_asal',
+											'l.nama_layanan', 'l.idunit_kerja')
 								->where('pl.ts_req_masuk_aplikasi_asal', '>=' ,'\''.$waktu_awal.'\'')
 								->where('pl.ts_req_masuk_aplikasi_asal', '<=' ,'\''.$waktu_akhir.'\'')
 								->where('l.idunit_kerja', session('userdata')['idunit_kerja'])
 								->where('ol.iduser', session('userdata')['iduser'])
+								->where('ol.is_deleted', false)
 								->orderBy('pl.created_at', 'desc')
+								->groupBy('pl.idpermintaan_layanan', 'pl.idlayanan', 'pl.created_at', 'pl.status', 'pl.idlayanan_aplikasi_asal', 'pl.detail_layanan', 'pl.ts_req_masuk_aplikasi_asal',
+											'l.nama_layanan', 'l.idunit_kerja')
 								->get();
+		}
+		
 		// dd($permintaan_layanan);
 								
 		$agent = new Agent();
 
 		if ($agent->isMobile()) {
 			// dd('mobile');
+			
 			return view($this->setting_folder_view.'.index_admin_mobile', compact('menu','submenu','waktu_awal', 'waktu_akhir', 'tgl_awal','tgl_akhir', 'permintaan_layanan') );
+			
+			
 		} else {
 			// dd('web view');
+			
 			return view($this->setting_folder_view.'.index_admin', compact('menu','submenu','waktu_awal', 'waktu_akhir', 'tgl_awal','tgl_akhir', 'permintaan_layanan') );
+			
+			
 		}
 
 		
@@ -261,20 +295,51 @@ class PermintaanLayananController extends Controller
 
 		$timestamp_alat_q = DB::table('riwayat_pemakaian_aset as rap')
 								->where('rap.idpermintaan_layanan', $idpermintaan_layanan)
-								->select('rap.kode_barang_aset', 'rap.timestamp_mulai', 'rap.timestamp_akhir')
+								->select('rap.kode_barang_aset', 'rap.timestamp_mulai', 'rap.timestamp_akhir', 'rap.dimulai_oleh', 'rap.diakhiri_oleh')
 								->get();
 
 		$timestamp_alat = [];
 		foreach ($timestamp_alat_q as $item) {
+			$start = Carbon::parse($item->timestamp_mulai);
+			$end   = Carbon::parse($item->timestamp_akhir);
+
+			$diffInMinutes = $start->diffInMinutes($end); // total selisih dalam menit
+			$hours = intdiv($diffInMinutes, 60);          // bagi 60 untuk dapat jam
+			$minutes = $diffInMinutes % 60;               // sisa menit
+
 			$timestamp_alat[$item->kode_barang_aset] = [
 				'timestamp_mulai' => $item->timestamp_mulai,
-				'timestamp_akhir' => $item->timestamp_akhir
+				'timestamp_akhir' => $item->timestamp_akhir,
+				'dimulai_oleh' => $item->dimulai_oleh,
+				'diakhiri_oleh' => $item->diakhiri_oleh,
+				'durasi' => sprintf('%02d Jam %02d Menit', $hours, $minutes)
 			];
 		}
 
-		// dd($permintaan_layanan);
 
-		// dd($timestamp_alat, $alat_lab);
+		// dd( $timestamp_alat );
+
+		$laboran = [];
+
+		if(session('userdata')['idrole'] == 4){
+			$laboran_q = DB::table('operator_layanan as ol')
+							->join('user as u', 'ol.iduser', '=', 'u.iduser')
+							->join('layanan as l', 'ol.idlayanan', '=', 'l.idlayanan')
+							->join('permintaan_layanan as pl', 'l.idlayanan', '=', 'pl.idlayanan')
+							->where('pl.idpermintaan_layanan', $idpermintaan_layanan)
+							->where('ol.status', 't')
+							->where('ol.is_deleted', 'f')
+							->select('u.nama', 'u.gelar_depan', 'u.gelar_belakang', 'u.nipnik', 'u.iduser')
+							->orderBy('u.nama', 'asc')
+							->get();
+
+			foreach ($laboran_q as $item) {
+				$laboran[$item->iduser] = $item;
+			}
+		}
+
+		// dd($laboran);
+
 		
 
 		date_default_timezone_set('Asia/Jakarta');
@@ -283,10 +348,22 @@ class PermintaanLayananController extends Controller
 		$agent = new Agent();
 
 		if ($agent->isMobile()) {
-			return view($this->setting_folder_view.'.detailpermintaanlayanan_mobile', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat') );
+			if(session('userdata')['idrole'] == 4){
+				return view($this->setting_folder_view.'.detailpermintaanlayanan_mobile_pjruang', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat', 'laboran') );
+			}
+			else{
+				return view($this->setting_folder_view.'.detailpermintaanlayanan_mobile', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat', 'laboran') );
+			}
+			
 		}
 		else{
-			return view($this->setting_folder_view.'.detailpermintaanlayanan', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat') );
+			if(session('userdata')['idrole'] == 4){
+				return view($this->setting_folder_view.'.detailpermintaanlayanan_pjruang', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat', 'laboran') );
+			}
+			else{
+				return view($this->setting_folder_view.'.detailpermintaanlayanan', compact('menu', 'submenu', 'permintaan_layanan', 'alat_lab', 'ts', 'timestamp_alat', 'laboran') );
+			}
+			
 		}
 
 		
@@ -330,6 +407,9 @@ class PermintaanLayananController extends Controller
 		$idpermintaan_layanan = $req->idpermintaan_layanan;
 		$ts = $req->timestamp;
 
+		date_default_timezone_set('Asia/Jakarta');
+		$ts_now = date('Y-m-d H:i:s');
+
 		$cek = DB::table('riwayat_pemakaian_aset as rap')
 							->where('rap.idpermintaan_layanan', $idpermintaan_layanan)
 							->where('rap.kode_barang_aset', $kode_barang_aset)
@@ -339,10 +419,12 @@ class PermintaanLayananController extends Controller
 		if($type == 1){	
 			$kol_waktu = 'timestamp_mulai';
 			$kol_oleh = 'dimulai_oleh';
+			$ts_isi = 'ts_mulai_diisi';
 		}
 		else{
 			$kol_waktu = 'timestamp_akhir';	
 			$kol_oleh = 'diakhiri_oleh';
+			$ts_isi = 'ts_akhir_diisi';
 		}
 
 		// date_default_timezone_set('Asia/Jakarta');
@@ -355,6 +437,7 @@ class PermintaanLayananController extends Controller
 					->update([
 						$kol_waktu => $ts,
 						$kol_oleh => session('userdata')['iduser'],
+						$ts_isi => $ts_now
 					]);
 			} catch (\Exception $e) {
 				return response()->json([
@@ -372,7 +455,7 @@ class PermintaanLayananController extends Controller
 						'kode_barang_aset' => $kode_barang_aset,
 						$kol_waktu => $ts,
 						$kol_oleh => session('userdata')['iduser'],
-						'created_at' => $ts,
+						'ts_mulai_diisi' => $ts_now,
 					]);
 			} catch (\Exception $e) {
 				return response()->json([

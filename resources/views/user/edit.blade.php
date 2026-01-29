@@ -175,6 +175,7 @@
                                                 <th>Unit Kerja</th>
                                                 <th>Status</th>
                                                 <th>is_delete</th>
+												<th>Ruang</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -193,6 +194,13 @@
 														<button type="button" class="btn btn-danger btn-sm" onclick="hapus({{ $ru->idrole_user }}, 0)">Terhapus</button>  
 													@else 
 														<button type="button" class="btn btn-success btn-sm" onclick="hapus({{ $ru->idrole_user }}, 1)">Tidak</button> 
+													@endif
+												</td>
+												<td>
+													@if($ru->idrole == 4)
+													<a href="{{ route('pj_ruang_edit_ruang', ['idrole_user' => encrypt($ru->idrole_user), 'iduser' => encrypt($iduser)]) }}">{{ $ru->jumlah_ruang }}</a>
+													@else
+													-
 													@endif
 												</td>
 											</tr>

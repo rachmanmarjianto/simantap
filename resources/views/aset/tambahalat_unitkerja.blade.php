@@ -56,6 +56,7 @@
                                             <th>Nama</th>
                                             <th>Merk</th>
                                             <th>Tahun Aset</th>
+                                            <th>Kondisi</th>
                                             <th>Ruang</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -65,11 +66,22 @@
                                             @if(in_array($a->kode_barang, $alatlab))
                                                 @continue
                                             @endif
+                                            @php
+                                                $kondisi = '';
+                                                if($a->kondisi_barang == 1){
+                                                    $kondisi = 'Baik';
+                                                } else if($a->kondisi_barang == 2){
+                                                    $kondisi = 'Rusak Ringan';
+                                                } else {
+                                                    $kondisi = 'Rusak Berat';
+                                                }
+                                            @endphp
                                             <tr>
                                                 <td>{{ $a->kode_barang }}</td>
                                                 <td>{{ $a->nama_barang }}</td>
                                                 <td>{{ $a->merk_barang }}</td>
                                                 <td>{{ $a->tahun_aset }}</td>
+                                                <td>{{ $kondisi }}</td>
                                                 <td>{{ $a->nama_ruang }} # {{ $a->nama_gedung }} # {{ $a->nama_kampus }}</td>
                                                 <td id="btntari-{{ $a->kode_barang }}">
                                                     <button class="btn btn-rounded btn-success" onclick="tarikdata('{{ $a->kode_barang }}')">Tarik</button>

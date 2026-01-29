@@ -105,7 +105,7 @@
                                             @else
                                                 <button type="button" class="btn btn-outline-success">Awal</button>
                                             @endif
-                                            <input type="text" id="mulai-{{ $al->kode_barang_aset }}" name="ts_mulai[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'] ?? '' }}">
+                                            <input type="text" id="mulai-{{ $al->kode_barang_aset }}" name="ts_mulai[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_mulai'] ?? '' }}" onchange="simpan(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
                                             <span class="input-group-btn" >
                                                 <button type="button" id="btn-simpan-awal-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(1, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
                                                     @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
@@ -132,7 +132,7 @@
                                             @else
                                                 <button type="button" class="btn btn-outline-danger">Akhir</button>                                                        
                                             @endif
-                                            <input type="text" id="akhir-{{ $al->kode_barang_aset }}" name="ts_akhir[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'] ?? '' }}" id="akhir-{{ $al->kode_barang_aset }}" >
+                                            <input type="text" id="akhir-{{ $al->kode_barang_aset }}" name="ts_akhir[{{ $i }}]" class="form-control tspicker" value="{{ $timestamp_alat[$al->kode_barang_aset]['timestamp_akhir'] ?? '' }}"  onchange="simpan(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
                                             <span class="input-group-btn" >
                                                 <button type="button" id="btn-simpan-akhir-{{ $al->kode_barang_aset }}" class="btn waves-effect waves-light btn-ft btn-primary" onclick="simpan(2, {{ $al->kode_barang_aset }}, {{ $al->idpermintaan_layanan }})">
                                                     @if(array_key_exists($al->kode_barang_aset, $timestamp_alat))
@@ -157,6 +157,24 @@
                         $i++;
                     @endphp
                 @endforeach
+
+
+                @if($permintaan_layanan->status != '3')
+                    <div class="col-sm-12 col-md-6">                    
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center w-100 mt-3">
+                                    <div class="flex-grow-1">
+                                    </div>
+                                    <div id="btn-selesai">
+                                        <button type="button" class="btn btn-warning" onclick="setselesai()">Set Selesai!!</button>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 
                 

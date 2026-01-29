@@ -55,6 +55,7 @@
                                             <th>Nama</th>
                                             <th>Merk</th>
                                             <th>Tahun Aset</th>
+                                            <th>Kondisi</th>
                                             <th>Ruang</th>
                                             <th>Kapasitas Max (Min/Hari)</th>
                                             {{-- <th>Aksi</th> --}}
@@ -62,13 +63,24 @@
                                     </thead>
                                     <tbody>
                                         @foreach($aset as $a)
+                                        @php
+                                            $kondisi = '';
+                                            if($a->kondisi_barang == 1){
+                                                $kondisi = 'Baik';
+                                            } else if($a->kondisi_barang == 2){
+                                                $kondisi = 'Rusak Ringan';
+                                            } else {
+                                                $kondisi = 'Rusak Berat';
+                                            }
+                                        @endphp
                                         <tr>
                                             <td>{{ $a->kode_barang_aset }}</td>
                                             <td>{{ $a->nama_barang }}</td>
                                             <td>{{ $a->merk_barang }}</td>
                                             <td>{{ $a->tahun_aset }}</td>
+                                            <td>{{ $kondisi }}</td>
                                             <td>{{ $a->nama_ruang }}#{{ $a->nama_gedung }}#{{ $a->nama_kampus }}</td>
-                                            <td style="cursor:pointer" onclick="setkapasitasmax('{{ $a->kode_barang_aset }}')" title="set kapasitas max">{{ $a->kapasitas_max }}</td>
+                                            <td style="cursor:pointer" onclick="setkapasitasmax('{{ $a->kode_barang_aset }}')" title="set kapasitas max"><input type="text" class="form-control input-default " value="{{ $a->kapasitas_max }}"  readonly/></td>
                                             {{-- <td>
                                                 <a href="" class="btn btn-rounded btn-primary">Detail</a>
                                             </td> --}}
@@ -145,7 +157,8 @@
     <script>
         $(document).ready(function() {
             $('#example3').DataTable({
-                "order": [[ 0, "asc" ]]
+                "order": [[ 0, "asc" ]],
+                "pageLength": 50
             });
         });
 

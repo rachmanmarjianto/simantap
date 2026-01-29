@@ -94,7 +94,8 @@ class LayananOperatorController extends Controller
 		$operator = DB::table('layanan as l')
 						->leftJoin('operator_layanan as ol', function($join) {
 							$join->on('l.idlayanan', '=', 'ol.idlayanan')
-								->where('ol.is_deleted', 0);
+								->where('ol.is_deleted', 0)
+								->where('ol.status', true);
 						})
 						->select('l.nama_layanan', 'l.idlayanan', DB::raw('COUNT(ol.idoperator_layanan) as jumlah_operator'))
 						->groupBy('l.nama_layanan', 'l.idlayanan')

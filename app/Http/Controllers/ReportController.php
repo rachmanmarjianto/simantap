@@ -289,6 +289,7 @@ class ReportController extends Controller
                                 'pl.ts_req_masuk_aplikasi_asal',
                                 'rpa.timestamp_mulai',
                                 'rpa.timestamp_akhir',
+                                'pl.detail_layanan',
                                 DB::raw('SUM(EXTRACT(EPOCH FROM rpa.timestamp_akhir - rpa.timestamp_mulai)) AS durasi_detik')
                             )
                             ->orderBy('rpa.timestamp_mulai', 'desc')

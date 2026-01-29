@@ -82,7 +82,8 @@
     <script>
         $(document).ready(function() {
             $('#example3').DataTable({
-                "order": [[ 0, "asc" ]]
+                "order": [[ 0, "asc" ]],
+                "pageLength": 50
             });
         });
 

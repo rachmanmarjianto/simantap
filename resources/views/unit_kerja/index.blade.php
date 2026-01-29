@@ -1,4 +1,10 @@
 @extends('layout_home')
+
+@section('title', 'Setting Unit Kerja')
+
+@section('page-css')
+@endsection
+
 @section('content')
 		<div class="content-body">
 			<div class="container-fluid">
@@ -28,37 +34,45 @@
 								</div>
 							@endif
 							<div class="card-header">
-								<h4 class="card-title">
-									<button type="button" class="btn btn-rounded btn-outline-primary" onclick = "location.href='{{ route('unit_kerja_tambah') }}';">Tambah Data</button>
-								</h4>
+								
 							</div>
 							<div class="card-body">
 								<div class="table-responsive">
-									<table id="example3" class="display" style="min-width: 845px">
+									<table id="example3" class="table table-striped table-responsive-sm" style="min-width: 845px">
 										<thead>
 											<tr>
 												<th>Nama Unit Kerja</th>
-												<th>Type Unit Kerja</th>
-												<th>Status</th>
-												<th>Fakultas</th>
-												<th>Program Studi</th>
-												<th>Action</th>
+												<th>Layanan</th>
+												<th>Penelitian</th>
+												<th>Praktikum</th>
 											</tr>
 										</thead>
 										<tbody>
-											@foreach ($list_unit as $unit)
+											@foreach ($unit_kerja as $unit)
 											<tr>
-												<td>{{ $unit->nama_unit_kerja }}</td>
-												<td>{{ $unit->type_unit_kerja }}</td>
-												<td>{{ $unit->status }}</td>
-												<td>{{ $unit->idfakultas }}</td>
-												<td>{{ $unit->idprogram_studi }}</td>
-												<td>
-													<button type="button" class="btn btn-rounded btn-outline-primary" onclick = "location.href='{{ route('unit_kerja_edit', ['id' => $unit->idunit_kerja] ) }}';">Edit</button>
-													<button type="button" class="btn btn-rounded btn-outline-danger" onclick="if(confirm('Yakin hapus ?')){ location.href='{{ route('unit_kerja_hapus', ['id' => $unit->idunit_kerja]) }}'; }">
-														Hapus
-													</button>
+												<td>{{ $unit->nm_unit_kerja }}</td>
+												<td id="status_layanan_{{ $unit->idunit_kerja_simantap }}">
+													@if($unit->layanan == 1)
+														<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'layanan', 0)">Aktif</button>
+													@else
+														<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'layanan', 1)">Non Aktif</button>
+													@endif
 												</td>
+												<td id="status_penelitian_{{ $unit->idunit_kerja_simantap }}">
+													@if($unit->penelitian == 1)
+														<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'penelitian', 0)">Aktif</button>
+													@else
+														<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'penelitian', 1)">Non Aktif</button>
+													@endif
+												</td>
+												<td id="status_praktikum_{{ $unit->idunit_kerja_simantap }}">
+													@if($unit->praktikum == 1)
+														<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'praktikum', 0)">Aktif</button>
+													@else
+														<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus({{ $unit->idunit_kerja_simantap }}, 'praktikum', 1)">Non Aktif</button>
+													@endif
+												</td>
+
 											</tr>
 											@endforeach
 										</tbody>
@@ -70,4 +84,53 @@
 				</div>
 			</div>
 		</div>
+@endsection
+
+@section('javascript')
+	<script>
+		function ubahstatus(idunit, jenis, statusbaru){
+			var idkol = '#status_'+jenis+'_'+idunit;
+			$(idkol).html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+
+			$.ajax({
+				url: "{{ route('unitkerja_ubahstatus') }}",
+				type: "POST",
+				data: {
+					_token: '{{ csrf_token() }}',
+					idunit: idunit,
+					jenis: jenis,
+					statusbaru: statusbaru
+				},
+				success: function(response){
+					if(response.code == 200){
+						if(statusbaru == 1){
+							$(idkol).html('<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus('+idunit+', \''+jenis+'\', 0)">Aktif</button>');
+						} else {
+							$(idkol).html('<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus('+idunit+', \''+jenis+'\', 1)">Non Aktif</button>');
+						}
+					} else {
+						alert('Gagal mengubah status: ' + response.message);
+						
+						if(statusbaru == 1){
+							$(idkol).html('<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus('+idunit+', \''+jenis+'\', 1)">Non Aktif</button>');
+						} else {
+							$(idkol).html('<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus('+idunit+', \''+jenis+'\', 0)">Aktif</button>');
+						}
+					}
+				},
+				error: function(xhr){
+					alert('Terjadi kesalahan saat mengubah status.'+ xhr.responseText);
+					if(statusbaru == 1){
+						$(idkol).html('<button type="button" class="btn btn-rounded btn-danger" onclick="ubahstatus('+idunit+', \''+jenis+'\', 1)">Non Aktif</button>');
+					} else {
+						$(idkol).html('<button type="button" class="btn btn-rounded btn-success" onclick="ubahstatus('+idunit+', \''+jenis+'\', 0)">Aktif</button>');
+					}
+				}
+				
+			});
+		}
+		
+	</script>
+
+
 @endsection

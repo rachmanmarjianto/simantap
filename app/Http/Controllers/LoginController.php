@@ -48,10 +48,11 @@ class LoginController extends Controller
 			if ( isset($result['message']) and $result['message'] == 'Login berhasil!' )
 			{
 				// Proses login berhasil
-				$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja')
+				$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja', 'uks.layanan', 'uks.penelitian', 'uks.praktikum')
 					->join('role_user', 'user.iduser', '=', 'role_user.iduser')
 					->join('role', 'role_user.idrole', '=', 'role.idrole')
-					->leftJoin('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
+					->join('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
+					->join('unit_kerja_simantap as uks', 'role_user.idunit_kerja', '=', 'uks.idunit_kerja_simantap')
 					->where('user.nipnik', $validatedData['username'])
 					->where('role_user.status', 't')
 					->where('role_user.is_delete', 0)
@@ -73,13 +74,17 @@ class LoginController extends Controller
 							'idunit_kerja' => $pengguna->idunit_kerja,
 							'idrole' => $pengguna->idrole,
 							'nama_role' => $pengguna->nama_role,
-							'nama_unit_kerja' => $pengguna->nm_unit_kerja
+							'nama_unit_kerja' => $pengguna->nm_unit_kerja,
+							'layanan' => $pengguna->layanan,
+							'penelitian' => $pengguna->penelitian,
+							'praktikum' => $pengguna->praktikum,
 						)
 					]);
 
 					// dd(session()->get('userdata'));
 
-					return redirect()->route('home');
+					// return redirect()->route('home');
+					return redirect()->intended('/home')->with('success', 'Login successful!');
 				}
 				else
 				{

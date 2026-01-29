@@ -25,13 +25,26 @@ class AsetController extends Controller
 		$menu = 'master';
 		$submenu = 'alatlab';
 
+		// dd(session('userdata')['idrole']);
+
 
 		if(session('userdata')['idrole'] == 1){
 			$unitkerja = DB::table(DB::raw('(SELECT idunit_kerja FROM role_user GROUP BY idunit_kerja) as q1'))
 						->join('aucc.unit_kerja as uk', 'q1.idunit_kerja', '=', 'uk.id_unit_kerja')
-						->join('simba.ruang as r', 'q1.idunit_kerja', '=', 'r.id_unit_kerja')
-						->leftJoin('aset as a', 'r.id', '=', 'a.idruang')
+						->leftJoin('aset as a', 'q1.idunit_kerja', '=', 'a.idunit_kerja')
 						->select('q1.idunit_kerja', 'uk.nm_unit_kerja', DB::raw('COUNT(a.kode_barang_aset) as jumlah_aset'))
+						->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
+						->orderBy('uk.nm_unit_kerja', 'asc')
+						->get();
+		}
+		else if(session('userdata')['idrole'] == 4){
+			$unitkerja = DB::table(DB::raw('(SELECT idunit_kerja FROM role_user where status = true GROUP BY idunit_kerja) as q1'))
+						->join('aucc.unit_kerja as uk', 'q1.idunit_kerja', '=', 'uk.id_unit_kerja')
+						->leftJoin(DB::raw('(SELECT a.* from aset as a
+											join pj_ruang as pr on a.idruang = pr.idruang
+											where pr.iduser = '.session('userdata')['iduser'].' and pr.status = true) as a'), 'q1.idunit_kerja', '=', 'a.idunit_kerja')
+						->select('q1.idunit_kerja', 'uk.nm_unit_kerja', DB::raw('COUNT(a.kode_barang_aset) as jumlah_aset'))
+						->where('q1.idunit_kerja', session('userdata')['idunit_kerja'])
 						->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
 						->orderBy('uk.nm_unit_kerja', 'asc')
 						->get();
@@ -39,9 +52,9 @@ class AsetController extends Controller
 		else{
 			$unitkerja = DB::table(DB::raw('(SELECT idunit_kerja FROM role_user where status = true GROUP BY idunit_kerja) as q1'))
 						->join('aucc.unit_kerja as uk', 'q1.idunit_kerja', '=', 'uk.id_unit_kerja')
-						->join('simba.ruang as r', 'q1.idunit_kerja', '=', 'r.id_unit_kerja')
-						->leftJoin('aset as a', 'r.id', '=', 'a.idruang')
+						->leftJoin('aset as a', 'q1.idunit_kerja', '=', 'a.idunit_kerja')
 						->select('q1.idunit_kerja', 'uk.nm_unit_kerja', DB::raw('COUNT(a.kode_barang_aset) as jumlah_aset'))
+						->where('q1.idunit_kerja', session('userdata')['idunit_kerja'])
 						->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
 						->orderBy('uk.nm_unit_kerja', 'asc')
 						->get();
@@ -64,7 +77,27 @@ class AsetController extends Controller
 					->select('id_unit_kerja', 'nm_unit_kerja')
 					->first();
 
-		$aset = DB::table('aset as a')
+		if(session('userdata')['idrole'] == 4){
+			$aset = DB::table('aset as a')
+					->join('simba.ruang as r', 'a.idruang', '=', 'r.id')
+					->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
+					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
+					->join('pj_ruang as pr', function($join) {
+						$join->on('r.id', '=', 'pr.idruang')
+							->where('pr.iduser', session('userdata')['iduser'])
+							 ->where('pr.status', '=', true);
+					})
+					->leftjoin('kapasitas_max as km', function($join){
+						$join->on('a.kode_barang_aset', '=', 'km.kode_barang_aset')
+							->where('km.status', '=', true);
+					})
+					->where('a.idunit_kerja', $idunitkerja)
+					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang',
+							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
+					->get();
+		}
+		else{
+			$aset = DB::table('aset as a')
 					->join('simba.ruang as r', 'a.idruang', '=', 'r.id')
 					->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
 					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
@@ -72,10 +105,14 @@ class AsetController extends Controller
 						$join->on('a.kode_barang_aset', '=', 'km.kode_barang_aset')
 							->where('km.status', '=', true);
 					})
-					->where('r.id_unit_kerja', $idunitkerja)
-					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 
+					->where('a.idunit_kerja', $idunitkerja)
+					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang',
 							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
 					->get();
+
+		}
+
+		
 
 		return view($this->setting_folder_view.'.asetunitkerja', compact('menu', 'submenu', 'aset', 'unitkerja', 'idunitkerja') );
 	}
@@ -91,14 +128,35 @@ class AsetController extends Controller
 					->select('id_unit_kerja', 'nm_unit_kerja')
 					->first();
 
-		$aset = DB::table('simba.barang_ruang_det as brd')
+		if(session('userdata')['idrole'] == 4){
+			$aset = DB::table('simba.barang_ruang_det as brd')
 					->join('simba.barang as b', 'brd.id_barang', '=', 'b.id')
 					->join('simba.ruang as r', 'brd.id_ruang', '=', 'r.id')
 					->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
 					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
-					->where('r.id_unit_kerja', $idunitkerja_plain)
-					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'r.id as idruang')
+					->join('pj_ruang as pr', function($join) {
+						$join->on('r.id', '=', 'pr.idruang')
+							 ->where('pr.iduser', session('userdata')['iduser'])
+							 ->where('pr.status', '=', true);
+					})
+					->where('brd.id_unit_kerja', $idunitkerja_plain)
+					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 
+							'k.nama_kampus', 'r.id as idruang', 'brd.status_barang as kondisi_barang')
 					->get();
+		}
+		else{
+			$aset = DB::table('simba.barang_ruang_det as brd')
+					->join('simba.barang as b', 'brd.id_barang', '=', 'b.id')
+					->join('simba.ruang as r', 'brd.id_ruang', '=', 'r.id')
+					->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
+					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
+					->where('brd.id_unit_kerja', $idunitkerja_plain)
+					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 
+								'k.nama_kampus', 'r.id as idruang', 'brd.status_barang as kondisi_barang')
+					->get();
+		}
+
+		
 
 		$alatlab_q = DB::table('aset as a')
 					->join('simba.ruang as r', 'a.idruang', '=', 'r.id')
@@ -125,7 +183,7 @@ class AsetController extends Controller
 					->join('simba.barang as b', 'brd.id_barang', '=', 'b.id')
 					->join('simba.ruang as r', 'brd.id_ruang', '=', 'r.id')
 					->where('brd.kode_barang', $kode_barang)
-					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.id as idruang')
+					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.id as idruang', 'brd.id_unit_kerja', 'brd.status_barang')
 					->first();
 
 		if(!$aset) {
@@ -142,7 +200,9 @@ class AsetController extends Controller
 			'merk_barang' => $aset->merk_barang,
 			'tahun_aset' => $aset->tahun_aset,
 			'idruang' => $aset->idruang,
-			'created_at' => $ts
+			'created_at' => $ts,
+			'idunit_kerja' => $aset->id_unit_kerja,
+			'kondisi_barang' => $aset->status_barang,
 		);
 
 		try {

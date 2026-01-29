@@ -8,6 +8,12 @@ use App\Http\Controllers\LayananAsetController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ApiAplikasiController;
 use App\Http\Controllers\LayananOperatorController;
+use App\Http\Controllers\UnitkerjaController;
+use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\PjRuangController;
+use App\Http\Controllers\PraktikumController;
+use App\Http\Controllers\PenelitianController;
+use App\Http\Controllers\FormMaintenanceController;
 
 
 Route::middleware(['akses:1,2'])->group(function () {
@@ -88,18 +94,7 @@ Route::middleware(['akses:1,2'])->group(function () {
     Route::get('/layanan/layananunitkerja/{id}', [LayananController::class, 'layananunitkerja'])->name('layanan_unit_kerja_detail');
     Route::post('/layanan/tarik_master_layanan', [LayananController::class, 'tarik_master_layanan'])->name('layanan_tarik_master_layanan');
 
-	$tmp_prefix = 'aset';
-	Route::get('/'.$tmp_prefix.'/', [AsetController::class, 'index'])->name($tmp_prefix.'_index');
-	Route::get('/'.$tmp_prefix.'/tambah', [AsetController::class, 'tambah'])->name($tmp_prefix.'_tambah');
-	Route::post('/'.$tmp_prefix.'/tambah-simpan', [AsetController::class, 'tambah_simpan'])->name($tmp_prefix.'_simpan');
-	Route::get('/'.$tmp_prefix.'/hapus/{id}', [AsetController::class, 'hapus'])->name($tmp_prefix.'_hapus');
-	Route::get('/'.$tmp_prefix.'/edit/{id}', [AsetController::class, 'edit'])->name($tmp_prefix.'_edit');
-	Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [AsetController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
-    Route::get('/'.$tmp_prefix.'/asetuk/{id}', [AsetController::class, 'asetunitkerja'])->name($tmp_prefix.'_unit_kerja_index');
-    Route::get('/'.$tmp_prefix.'/tambah/{idunitkerja}', [AsetController::class, 'tambahalat_unitkerja'])->name($tmp_prefix.'_unitkerja_tambah');
-    Route::post('/'.$tmp_prefix.'/tarik_master_aset', [AsetController::class, 'tarik_master_aset'])->name($tmp_prefix.'_unitkerja_tarik');
-	Route::post('/'.$tmp_prefix.'/kapasitas_max_get', [AsetController::class, 'get_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_get');
-	Route::post('/'.$tmp_prefix.'/kapasitas_max_simpan', [AsetController::class, 'simpan_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_simpan');
+	
 
 	$tmp_prefix = 'layanan_aset';
 	Route::get('/'.$tmp_prefix.'/', [LayananAsetController::class, 'index'])->name($tmp_prefix.'_index');
@@ -137,13 +132,7 @@ Route::middleware(['akses:1,2'])->group(function () {
 	Route::get('/'.$tmp_prefix.'/edit/{id}', [RuangController::class, 'edit'])->name($tmp_prefix.'_edit');
 	Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [RuangController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
 
-	$tmp_prefix = 'permintaan_layanan';
-	Route::get('/'.$tmp_prefix.'/', [PermintaanLayananController::class, 'index'])->name($tmp_prefix.'_index');
-	Route::get('/'.$tmp_prefix.'/tambah', [PermintaanLayananController::class, 'tambah'])->name($tmp_prefix.'_tambah');
-	Route::post('/'.$tmp_prefix.'/tambah-simpan', [PermintaanLayananController::class, 'tambah_simpan'])->name($tmp_prefix.'_simpan');
-	Route::get('/'.$tmp_prefix.'/hapus/{id}', [PermintaanLayananController::class, 'hapus'])->name($tmp_prefix.'_hapus');
-	Route::get('/'.$tmp_prefix.'/edit/{id}', [PermintaanLayananController::class, 'edit'])->name($tmp_prefix.'_edit');
-	Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [PermintaanLayananController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
+	
 
 	$tmp_prefix = 'pemakaian_aset';
 	Route::get('/'.$tmp_prefix.'/', [PemakaianAsetController::class, 'index'])->name($tmp_prefix.'_index');
@@ -183,4 +172,66 @@ Route::middleware(['akses:1,2'])->group(function () {
 	Route::get('/transaksi-alat/edit/{id}', [TransaksiAlatController::class, 'edit'])->name('transaksi_alat_edit');
 	Route::post('/transaksi-alat/edit/{id}/simpan', [TransaksiAlatController::class, 'edit_simpan'])->name('transaksi_alat_edit_simpan');
 
+	Route::get('/unitkerja/', [UnitkerjaController::class, 'index'])->name('unitkerja_index');
+	Route::post('/unitkerja/ubahstatus', [UnitkerjaController::class, 'ubahstatus'])->name('unitkerja_ubahstatus');
+
+});
+
+Route::middleware(['akses:1,2,4'])->group(function () {
+	$tmp_prefix = 'aset';
+	Route::get('/'.$tmp_prefix.'/', [AsetController::class, 'index'])->name($tmp_prefix.'_index');
+	Route::get('/'.$tmp_prefix.'/tambah', [AsetController::class, 'tambah'])->name($tmp_prefix.'_tambah');
+	Route::post('/'.$tmp_prefix.'/tambah-simpan', [AsetController::class, 'tambah_simpan'])->name($tmp_prefix.'_simpan');
+	Route::get('/'.$tmp_prefix.'/hapus/{id}', [AsetController::class, 'hapus'])->name($tmp_prefix.'_hapus');
+	Route::get('/'.$tmp_prefix.'/edit/{id}', [AsetController::class, 'edit'])->name($tmp_prefix.'_edit');
+	Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [AsetController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
+    Route::get('/'.$tmp_prefix.'/asetuk/{id}', [AsetController::class, 'asetunitkerja'])->name($tmp_prefix.'_unit_kerja_index');
+    Route::get('/'.$tmp_prefix.'/tambah/{idunitkerja}', [AsetController::class, 'tambahalat_unitkerja'])->name($tmp_prefix.'_unitkerja_tambah');
+    Route::post('/'.$tmp_prefix.'/tarik_master_aset', [AsetController::class, 'tarik_master_aset'])->name($tmp_prefix.'_unitkerja_tarik');
+	Route::post('/'.$tmp_prefix.'/kapasitas_max_get', [AsetController::class, 'get_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_get');
+	Route::post('/'.$tmp_prefix.'/kapasitas_max_simpan', [AsetController::class, 'simpan_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_simpan');
+
+	Route::get('/maintenance-alat/', [MaintenanceController::class, 'index'])->name('maintenance_alat_index');
+	Route::get('/maintenance-alat/unitkerja/{id}', [MaintenanceController::class, 'maintenance_unit_kerja'])->name('maintenance_unit_kerja');
+	Route::get('/maintenance-alat/tambahalat/{idunitkerja}', [MaintenanceController::class, 'tambah_alat'])->name('maintenance_unitkerja_tambah');
+	Route::post('/maintenance-alat/aktifkanmaintenance_alat', [MaintenanceController::class, 'aktifkan_maintenance_alat'])->name('maintenance_unitkerja_aktifkan');
+	Route::post('/maintenance-alat/get_jarak', [MaintenanceController::class, 'get_jarak_maintenance'])->name('maintenance_jarak_hari_get');
+	Route::post('/maintenance-alat/jarak_hari_simpan', [MaintenanceController::class, 'jarak_hari_simpan'])->name('maintenance_jarak_hari_simpan');
+	Route::post('/maintenance-alat/get_pj', [MaintenanceController::class, 'get_pj_maintenance'])->name('maintenance_pj_maintenance_get');
+	Route::post('/maintenance-alat/pj_simpan', [MaintenanceController::class, 'pj_simpan'])->name('maintenance_pj_maintenance_simpan');
+	Route::post('/maintenance-alat/pj_ubah_status', [MaintenanceController::class, 'pj_ubah_status'])->name('maintenance_pj_maintenance_ubah_status');
+	Route::post('/maintenance-alat/aktifasi_kalibrasi_maintenance', [MaintenanceController::class, 'aktifasi_kalibrasi_maintenance'])->name('maintenance_aktifasi_kalibrasi_maintenance_get');
+	Route::post('/maintenance-alat/ubahstatus_kalibrasi_maintenance', [MaintenanceController::class, 'ubahstatus_kalibrasi_maintenance'])->name('ubah_status_maintenance_kalibrasi');
+
+	Route::get('/pjruang/{idrole_user}/{iduser}', [PjRuangController::class, 'edit_ruang'])->name('pj_ruang_edit_ruang');
+	Route::post('/pjruang/tambahruangpj', [PjRuangController::class, 'tambahruangpj'])->name('user_tambah_ruang_pj');
+	Route::post('/pjruang/ubahstatusruangpj', [PjRuangController::class, 'ubahstatusruangpj'])->name('user_ubah_status_ruang_pj');
+	Route::get('/pjruang/ruanganpj', [PjRuangController::class, 'ruanganpj'])->name('pj_ruang_ruanganpj');
+
+	// $tmp_prefix = 'permintaan_layanan';
+	// Route::get('/'.$tmp_prefix.'/', [PermintaanLayananController::class, 'index'])->name($tmp_prefix.'_index');
+	// Route::get('/'.$tmp_prefix.'/tambah', [PermintaanLayananController::class, 'tambah'])->name($tmp_prefix.'_tambah');
+	// Route::post('/'.$tmp_prefix.'/tambah-simpan', [PermintaanLayananController::class, 'tambah_simpan'])->name($tmp_prefix.'_simpan');
+	// Route::get('/'.$tmp_prefix.'/hapus/{id}', [PermintaanLayananController::class, 'hapus'])->name($tmp_prefix.'_hapus');
+	// Route::get('/'.$tmp_prefix.'/edit/{id}', [PermintaanLayananController::class, 'edit'])->name($tmp_prefix.'_edit');
+	// Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [PermintaanLayananController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
+
+	Route::get('/penelitian/', [PenelitianController::class, 'index'])->name('penelitian_index');
+
+	Route::get('/praktikum/', [PraktikumController::class, 'index'])->name('praktikum_index');
+
+	Route::get('/form_maintenance/', [FormMaintenanceController::class, 'index'])->name('form_maintenance_index');
+	Route::get('/form_maintenance/unit_kerja/{id}', [FormMaintenanceController::class, 'detail_unit_kerja'])->name('form_maintenance_unit_kerja');
+	Route::get('/form_maintenance/buatformbaru/{idunit_kerja}', [FormMaintenanceController::class, 'buat_formbaru'])->name('form_maintenance_create');
+	Route::post('/form_maintenance/simpan_form_baru', [FormMaintenanceController::class, 'simpan_form_baru'])->name('form_maintenance_simpan_form_baru');
+	Route::get('/form_maintenance/editform/{idform}', [FormMaintenanceController::class, 'edit_form'])->name('form_maintenance_edit_form');
+	Route::post('/form_maintenance/ubahstatus_template', [FormMaintenanceController::class, 'ubahstatus_template'])->name('form_maintenance_ganti_status_template');
+	Route::post('/form_maintenance/edit_nama_template', [FormMaintenanceController::class, 'edit_nama_template'])->name('form_maintenance_edit_nama_template');
+	Route::post('/form_maintenance/ubah_jenis_form', [FormMaintenanceController::class, 'ubah_jenis_form'])->name('form_maintenance_ubah_jenis_form');
+	Route::post('/form_maintenance/tambah_elemen', [FormMaintenanceController::class, 'tambah_elemen_baru'])->name('form_maintenance_mdl_tambah_elemen');
+	Route::post('/form_maintenance/get_parent_element', [FormMaintenanceController::class, 'get_parent_element'])->name('get_parent_element');
+	Route::post('/form_maintenance/simpan_nilai_default', [FormMaintenanceController::class, 'simpan_nilai_default'])->name('form_maintenance.edit.simpan_nilai_default');
+	Route::post('/form_maintenance/get_elemen_template', [FormMaintenanceController::class, 'get_elemen_template'])->name('form_maintenance.edit.get_isi_template');
+	Route::post('/form_maintenance/simpan_edit_elemen', [FormMaintenanceController::class, 'simpan_edit_elemen'])->name('form_maintenance.simpan_edit_elemen');
+	Route::post('/form_maintenance/hapus_elemen_template', [FormMaintenanceController::class, 'hapus_elemen_template'])->name('form_maintenance.hapus_elemen_template');
 });

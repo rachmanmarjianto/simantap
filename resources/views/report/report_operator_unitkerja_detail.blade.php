@@ -133,7 +133,7 @@
 												<td>{{ $sum->kode_barang_aset }}</td>
 												<td>{{ $sum->nama_barang }} # {{ $sum->merk_barang }} # {{ $sum->tahun_aset }}</td>
 												<td>{{ $sum->idpermintaan_layanan }}<br>({{ $sum->idlayanan_aplikasi_asal }})</td>
-												<td>{{ $sum->nama_layanan }}</td>
+												<td>{{ $sum->nama_layanan }} - {{ $sum->detail_layanan }}</td>
 												<td>{{ $sum->timestamp_mulai }}</td>
 												<td>{{ $sum->timestamp_akhir }}</td>
 												<td>

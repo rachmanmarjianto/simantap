@@ -295,7 +295,7 @@ class UserController extends Controller
 		return redirect()->route('user_index');
 	}
 
-	public function edit ($id)
+	public function edit($id)
 	{
 		$menu = 'master';
 		$submenu = 'user';
@@ -317,6 +317,7 @@ class UserController extends Controller
 			$role_user = DB::table('role_user as ru')
 								->join('role as r', 'ru.idrole', '=', 'r.idrole')
 								->join('aucc.unit_kerja as uk', 'ru.idunit_kerja', '=', 'uk.id_unit_kerja')
+								->leftJoin('pj_ruang as pr', 'ru.iduser', '=', 'pr.iduser')
 								->where('ru.iduser', $iduser)
 								->select(
 									'ru.idrole',
@@ -325,10 +326,12 @@ class UserController extends Controller
 									'uk.nm_unit_kerja as nama_unit_kerja',
 									'ru.status',
 									'ru.idrole_user',
-									'ru.is_delete'
+									'ru.is_delete',
+									DB::raw('COALESCE(COUNT(pr.idpj_ruang), 0) as jumlah_ruang')
 								)
 								->orderBy('ru.idrole', 'asc')
 								->orderBy('uk.nm_unit_kerja', 'asc')
+								->groupBy('ru.idrole', 'r.nama_role', 'uk.id_unit_kerja', 'uk.nm_unit_kerja', 'ru.status', 'ru.idrole_user', 'ru.is_delete')
 								->get();
 		} else {
 			$unit_kerja = DB::table('aucc.unit_kerja')
@@ -340,6 +343,10 @@ class UserController extends Controller
 			$role_user = DB::table('role_user as ru')
 							->join('role as r', 'ru.idrole', '=', 'r.idrole')
 							->join('aucc.unit_kerja as uk', 'ru.idunit_kerja', '=', 'uk.id_unit_kerja')
+							->leftJoin('pj_ruang as pr', function($join) {
+								$join->on('ru.iduser', '=', 'pr.iduser')
+									 ->where('pr.status', '=', 1);
+							})
 							->where('ru.iduser', $iduser)
 							->where('ru.idunit_kerja', session('userdata')['idunit_kerja'])
 							->select(
@@ -349,10 +356,12 @@ class UserController extends Controller
 								'uk.nm_unit_kerja as nama_unit_kerja',
 								'ru.status',
 								'ru.idrole_user',
-								'ru.is_delete'
+								'ru.is_delete',
+								DB::raw('COALESCE(COUNT(pr.idpj_ruang), 0) as jumlah_ruang')
 							)
 							->orderBy('ru.idrole', 'asc')
 							->orderBy('uk.nm_unit_kerja', 'asc')
+							->groupBy('ru.idrole', 'r.nama_role', 'uk.id_unit_kerja', 'uk.nm_unit_kerja', 'ru.status', 'ru.idrole_user', 'ru.is_delete')
 							->get();
 		}
 
