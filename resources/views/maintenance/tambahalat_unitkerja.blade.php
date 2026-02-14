@@ -65,7 +65,7 @@
                                             <tr>
                                                 <td>{{ $a->kode_barang_aset }}</td>
                                                 <td>{{ $a->nama_barang }}</td>
-                                                <td>{{ $a->merk_barang }}</td>
+                                                <td>{{ $a->merk_barang }}<br>{{ $a->keterangan }}</td>
                                                 <td>{{ $a->tahun_aset }}</td>
                                                 <td>{{ $a->nama_ruang }} # {{ $a->nama_gedung }} # {{ $a->nama_kampus }}</td>
                                                 <td id="btntari-{{ $a->kode_barang_aset }}">

@@ -65,7 +65,7 @@
 								<div class="form-group row">
 									<label class="col-sm-3 col-form-label">Merk Barang</label>
 									<div class="col-sm-9">
-										<input type="text" class="form-control" value="{{ $barang->merk_barang }}" readonly>
+										<input type="text" class="form-control" value="{{ $barang->merk_barang }} {{ $barang->keterangan }}" readonly>
 									</div>
 								</div>
 								<div class="form-group row">

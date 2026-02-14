@@ -76,7 +76,10 @@
                                         <tr>
                                             <td>{{ $a->kode_barang_aset }}</td>
                                             <td>{{ $a->nama_barang }}</td>
-                                            <td>{{ $a->merk_barang }}</td>
+                                            <td>
+                                                {{ $a->merk_barang }}<i class="fa fa-pencil" aria-hidden="true" style="cursor:pointer; color:red; float:right; vertical-align:super;" onclick="ubahketerangan('{{ $a->kode_barang_aset }}', '{{ $a->keterangan }}')"></i><br>
+                                                {{ $a->keterangan }}
+                                            </td>
                                             <td>{{ $a->tahun_aset }}</td>
                                             <td>{{ $kondisi }}</td>
                                             <td>{{ $a->nama_ruang }}#{{ $a->nama_gedung }}#{{ $a->nama_kampus }}</td>
@@ -91,6 +94,33 @@
                             </div>                                
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="mdl_keterangan_aset">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Keterangan Aset</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('aset_keterangan_simpan') }}" method="POST" id="form_keterangan">
+                        @csrf
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-12">                                    
+                                        <input type="hidden" name="kodeaset" id="mdl_kodeaset_keterangan">
+                                        <textarea class="form-control" name="keterangan" id="ta_keterangan" placeholder="Keterangan" rows="4" maxlength="500"></textarea>
+                                    </form>
+                                </div>                                
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="float:right" form="form_keterangan">Simpan</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -220,6 +250,13 @@
                     alert('Terjadi kesalahan: ' + error);
                 }
             });
+        }
+
+        function ubahketerangan(kodeaset, keterangan){
+            $('#mdl_kodeaset_keterangan').val(kodeaset);
+            $('#ta_keterangan').val(keterangan);
+            $('#mdl_keterangan_aset').modal('show');
+            console.log(kodeaset);
         }
     </script>
         

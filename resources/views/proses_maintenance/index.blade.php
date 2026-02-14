@@ -33,6 +33,24 @@
                 </div>
             @endif
             <div class="row">
+                @if(session('userdata')['idrole'] == 4 && $pengajuan > 0)
+                <div class="col-12" >
+                    <div class="card text-white bg-warning">                       
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div class="flex-grow-1">
+                                    <h4>Terdapat <span style="color: red;">{{ $pengajuan }}</span> Maintenance yang perlu diverifikasi</h4>
+                                </div>
+                                <div>
+                                    <button class="btn btn-light" style="margin-bottom: 10px" onclick="get_pengajuanverifikasi()">
+                                        Detail
+                                    </button>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+                @endif
                 
                 <div class="col-12" >
                     <div class="card">                       
@@ -52,7 +70,7 @@
                         <div class="card-header">
                             {{-- <div class="row"> --}}
                             <div class="col-md-6 col-sm-12">
-                                <h4 class="card-title">({{ $item->kode_barang_aset }}) {{ $item->nama_barang }} - {{ $item->merk_barang }}</h4>
+                                <h4 class="card-title">({{ $item->kode_barang_aset }}) {{ $item->nama_barang }} - {{ $item->merk_barang }} {{ $item->keterangan }}</h4>
                             </div>
                             <div class="col-md-6 col-sm-12" style="text-align: right;">
                                 @if($warning[$item->kode_barang_aset]['warna'] != 'none')
@@ -66,6 +84,23 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
+                                <div class="col-md-12 col-sm-12">
+                                    <div class="form-group col-md-12">
+                                        <label>Kondisi Aset</label>
+                                        @php
+                                           if($item->kondisi_barang == 1){
+                                               $item->kondisi_barang = 'Baik';
+                                           } else if($item->kondisi_barang == 2){
+                                               $item->kondisi_barang = 'Rusak Ringan';
+                                           } else if($item->kondisi_barang == 3){
+                                               $item->kondisi_barang = 'Rusak Berat';
+                                           } else {
+                                               $item->kondisi_barang = 'Tidak Diketahui';
+                                           }
+                                        @endphp
+                                        <input type="text" class="form-control" value="{{ $item->kondisi_barang }}" readonly>
+                                    </div>
+                                </div>
                                 <div class="col-md-6 col-sm-12">
                                     <div class="form-group col-md-12">
                                         <label>Tahun Anggaran</label>
@@ -173,6 +208,48 @@
         </div>
     </div>
 
+    @if(session('userdata')['idrole'] == 4 && $pengajuan > 0)
+        <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-hidden="true" id="mdl_pengajuanverifikasi">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Pengajuan Verifikasi</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="mdl_loader_pengajuanverifikasi">
+                            <div class="d-flex justify-content-center" style="display: block;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="mdl_content_pengajuanverifikasi" style="display: none;">
+
+                            <table class="table table-bordered table-responsive-sm" id="tbl_pengajuanverifikasi">
+                                <thead>
+                                    <tr>
+                                        <th>ID Form</th>
+                                        <th>Aset</th>
+                                        <th>Ruang</th>
+                                        <th>oleh</th>
+                                        <th>Jenis</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @endif
+
     <form action="{{ route('prosesmaintenance_tarik_aset_uk') }}" method="POST" id="form_cari">
         @csrf
         <input type="hidden" name="iduser" value="{{ session('userdata')['iduser'] }}">
@@ -192,6 +269,8 @@
     <script src="{{ asset('app-assets') }}/vendor/pickadate/picker.date.js"></script> --}}
 
     <script>
+        var cur_nik = "{{ session('userdata')['nipnik'] }}";
+
         function lihat_riwayat(id) {
             $('#mdl_title_riwayatmaintenance').html('');
             $('#mdl_loader_riwayatmaintenance').show();
@@ -230,8 +309,11 @@
                             }
 
                             var aksi_button = '';
-                            if(item.status == '1'){
+                            if(item.status == '1' && item.nipnik == cur_nik){
                                 aksi_button += '<a href="' + editurl + item.idmaintenance_encrypted + '" class="btn btn-sm btn-primary">Edit</a>';
+                            }
+                            else if(item.status == '1' && item.nipnik != cur_nik){
+                                aksi_button += '<a href="' + editurl + item.idmaintenance_encrypted + '" class="btn btn-sm btn-secondary">Detail</a>';
                             }
                             else if(item.status == '2'){
                                 aksi_button += '<a href="' + editurl + item.idmaintenance_encrypted + '" class="btn btn-sm btn-info">Detail</a> ';
@@ -279,6 +361,64 @@
             });
 
             // $('#row-' + id).html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+        }
+
+        function get_pengajuanverifikasi(){
+            $('#mdl_loader_pengajuanverifikasi').show();
+            $('#mdl_content_pengajuanverifikasi').hide();
+            $('#tbl_pengajuanverifikasi tbody').html('');
+            $('#mdl_pengajuanverifikasi').modal('show');
+
+            var editurl = "{{ url('/proses-maintenance/edit_maintenance_aset') }}/";
+
+            $.ajax({
+                url: "{{ route('prosesmaintenance_get_pengajuan_verifikasi') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    nipnik: cur_nik,
+                    idunitkerja: "{{ session('userdata')['idunit_kerja'] }}"
+                },
+                success: function(response){
+                    console.log(response);
+
+                    var tbody = '';
+                    if(response.data.length > 0){
+                        response.data.forEach(function(item){
+                            var aksi_button = '';
+                            
+                            aksi_button += '<a href="' + editurl + item.idmaintenance_encrypted + '" class="btn btn-sm btn-primary">Verifikasi</a>';
+
+                            if(item.gelar_depan == null || item.gelar_depan == '') {
+                                item.gelar_depan = '';
+                            }
+                            else {
+                                item.gelar_depan = item.gelar_depan+'. ';
+                            }
+
+                            tbody += '<tr >';
+                            tbody += '<td>' + item.idmaintenance_aset + '</td>';
+                            tbody += '<td>(' + item.kode_barang_aset + ') <br>' + item.nama_barang + ' - ' + item.merk_barang + '</td>';
+                            tbody += '<td>' + item.nama_ruang + ' # <br> ' + item.nama_gedung + ' # <br> ' + item.nama_kampus + '</td>';
+                            tbody += '<td>(' + item.nipnik + ') <br>' + item.gelar_depan + item.nama + '.,' + item.gelar_belakang + '</td>';
+                            tbody += '<td>' + item.jenis_maintenance + '</td>';
+                            tbody += '<td>' + aksi_button + '</td>';
+                            tbody += '</tr>';
+                        });
+                    } else {
+                        tbody += '<tr><td colspan="6" style="text-align:center;">Tidak ada pengajuan verifikasi maintenance</td></tr>';
+                    }
+                    $('#tbl_pengajuanverifikasi tbody').html(tbody);
+
+                    $('#mdl_loader_pengajuanverifikasi').hide();
+                    $('#mdl_content_pengajuanverifikasi').show();
+                },
+                error: function(xhr){
+                    alert('Terjadi kesalahan saat memuat pengajuan verifikasi.');
+                    $('#mdl_pengajuanverifikasi').modal('hide');
+                }
+            });
+
         }
 
         

@@ -114,6 +114,8 @@ class PermintaanLayananController extends Controller
 		$tgl_awal = $datehelp[0];
 		$tgl_akhir = $datehelp[1];
 
+		
+
 		$endpoint = DB::table('endpoint as e')
 						->join('aplikasi_uk as au', 'e.idaplikasi_uk', '=', 'au.idaplikasi_uk')
 						->where('au.idunit_kerja', $idunitkerja)
@@ -123,6 +125,8 @@ class PermintaanLayananController extends Controller
 						->where('au.status', 1)
 						->select('e.link')
 						->first();
+
+		// dd($tgl_awal, $tgl_akhir, $endpoint);
 
 		if( !$endpoint )
 		{
@@ -157,6 +161,8 @@ class PermintaanLayananController extends Controller
 
 			curl_close($curl);
 
+			// echo $response;die;
+
 			$result = json_decode($response, true);
 			
 		} catch (\Exception $e) {
@@ -169,9 +175,14 @@ class PermintaanLayananController extends Controller
 
 		if(count($result) == 0)
 		{
+			session(['tanggal' =>[
+				'tgl_awal' => $tgl_awal,
+				'tgl_akhir' => $tgl_akhir
+			]]);
+
 			Session::flash('status', [
 				'status' => 'warning',
-				'message' => 'Tidak ada data Permintaan layanan yang ditemukan untuk tanggal tersebut.'
+				'message' => 'Tidak ada data Permintaan layanan yang ditemukan untuk tanggal tersebut. '.$endpoint->link
 			]);
 			return redirect()->back();
 		}
@@ -288,7 +299,7 @@ class PermintaanLayananController extends Controller
 						->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
 						->where('pl.idpermintaan_layanan', $idpermintaan_layanan)
 						->where('la.is_deleted', 0)
-						->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus',
+						->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.keterangan',
 								'pl.*', 'l.nama_layanan', 'la.no_urut')
 						->orderBy('la.no_urut', 'asc')
 						->get();

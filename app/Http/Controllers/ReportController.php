@@ -79,6 +79,7 @@ class ReportController extends Controller
                         'a.nama_barang',
                         'a.merk_barang',
                         'a.tahun_aset',
+                        'a.keterangan',
                         DB::raw('SUM(EXTRACT(EPOCH FROM rpa.timestamp_akhir - rpa.timestamp_mulai)) AS durasi_detik'),
                         DB::raw('(COALESCE(km.kapasitas_max * '.$jumlah_hari.', 1) ) AS kapasitas_max'),
                     )
@@ -143,7 +144,7 @@ class ReportController extends Controller
                         ->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
                         ->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
                         ->where('a.kode_barang_aset', $kode_barang_aset)
-                        ->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
+                        ->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.keterangan')
                         ->first();
 
         $det_pemakaian = DB::table('layanan as l')
@@ -276,7 +277,8 @@ class ReportController extends Controller
                                 'l.nama_layanan',
                                 'pl.ts_req_masuk_aplikasi_asal',
                                 'rpa.timestamp_mulai',
-                                'rpa.timestamp_akhir'
+                                'rpa.timestamp_akhir',
+                                'a.keterangan'
                             )
                             ->select(
                                 'pl.idpermintaan_layanan',
@@ -290,6 +292,7 @@ class ReportController extends Controller
                                 'rpa.timestamp_mulai',
                                 'rpa.timestamp_akhir',
                                 'pl.detail_layanan',
+                                'a.keterangan',
                                 DB::raw('SUM(EXTRACT(EPOCH FROM rpa.timestamp_akhir - rpa.timestamp_mulai)) AS durasi_detik')
                             )
                             ->orderBy('rpa.timestamp_mulai', 'desc')

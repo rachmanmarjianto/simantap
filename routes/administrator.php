@@ -190,6 +190,7 @@ Route::middleware(['akses:1,2,4'])->group(function () {
     Route::post('/'.$tmp_prefix.'/tarik_master_aset', [AsetController::class, 'tarik_master_aset'])->name($tmp_prefix.'_unitkerja_tarik');
 	Route::post('/'.$tmp_prefix.'/kapasitas_max_get', [AsetController::class, 'get_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_get');
 	Route::post('/'.$tmp_prefix.'/kapasitas_max_simpan', [AsetController::class, 'simpan_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_simpan');
+	Route::post('/'.$tmp_prefix.'/keterangan_simpan', [AsetController::class, 'simpan_keterangan'])->name($tmp_prefix.'_keterangan_simpan');
 
 	Route::get('/maintenance-alat/', [MaintenanceController::class, 'index'])->name('maintenance_alat_index');
 	Route::get('/maintenance-alat/unitkerja/{id}', [MaintenanceController::class, 'maintenance_unit_kerja'])->name('maintenance_unit_kerja');

@@ -125,7 +125,7 @@
                                                     <input type="hidden" name="kode_barang_aset[{{ $i }}]" value="{{ $al->kode_barang_aset }}">
                                                 </td>
                                                 <td rowspan="1">{{ $al->kode_barang_aset }}</td>
-                                                <td rowspan="1">{{ $al->nama_barang }} {{ $al->merk_barang }}</td>
+                                                <td rowspan="1">{{ $al->nama_barang }} {{ $al->merk_barang }} {{ $al->keterangan }}</td>
                                                 <td rowspan="1">{{ $al->nama_ruang }}</td>
                                                 <td rowspan="1" id="lamapeng-{{ $al->kode_barang_aset }}"></td>
                                             </tr>

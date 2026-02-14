@@ -82,7 +82,7 @@
                             <div class="card-body">
                                 <input type="hidden" name="idpermintaan_layanan[{{ $i }}]" value="{{ $al->idpermintaan_layanan }}">
                                 <input type="hidden" name="kode_barang_aset[{{ $i }}]" value="{{ $al->kode_barang_aset }}">
-                                <h4>{{ $al->nama_barang }} - {{ $al->merk_barang }}</h4>
+                                <h4>{{ $al->nama_barang }} - {{ $al->merk_barang }} {{ $al->keterangan }}</h4>
                                 <ul class="list-group mb-3 list-group-flush">
                                     <li class="list-group-item px-0 border-top-0 d-flex justify-content-between"><span class="mb-0">Kode Aset</span>
                                         <strong>{{ $al->kode_barang_aset }}</strong>

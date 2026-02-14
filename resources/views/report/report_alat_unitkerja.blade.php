@@ -109,7 +109,7 @@
 											<tr>												
 												<td>{{ $sum->kode_barang_aset }}</td>
 												<td>{{ $sum->nama_barang }}</td>
-												<td>{{ $sum->merk_barang }}</td>
+												<td>{{ $sum->merk_barang }}<br>{{ $sum->keterangan }}</td>
 												<td>{{ $sum->tahun_aset }}</td>
 												<td>{{ $durasi_pemakaian }}</td>
 												<td>{{ $utilitas }}</td>

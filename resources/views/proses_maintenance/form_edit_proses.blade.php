@@ -73,7 +73,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Merk Barang</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" value="{{ $maintenance_aset->merk_barang }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $maintenance_aset->merk_barang }} {{ $maintenance_aset->keterangan }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -179,6 +179,27 @@
                                     <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
                                 </div>
                             </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Rekomendasi Status Aset</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" id="sel1" name="rekom_kondisi_aset" form="form_submit_maintenance_proses" onchange="change_rekom_kondisi_aset()">
+                                        <option value="1" @if($maintenance_aset->rekom_kondisi_aset == 1) selected @endif>Baik</option>
+                                        <option value="2" @if($maintenance_aset->rekom_kondisi_aset == 2) selected @endif>Rusak Ringan</option>
+                                        <option value="3" @if($maintenance_aset->rekom_kondisi_aset == 3) selected @endif>Rusak Berat</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" id="div_ajukan_maintenance" style="display: none;">
+                                <label class="col-sm-2 col-form-label">Ajukan permintaan Maintenance?</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" id="idajukanmaintenance" name="ajukan_maintenance" form="form_submit_maintenance_proses">
+                                        <option value="1" @if($maintenance_aset->permintaan_maintenance == 1) selected @endif>Ya</option>
+                                        <option value="0" @if($maintenance_aset->permintaan_maintenance == 0) selected @endif>Tidak</option>
+                                    </select>
+                                </div>
+                            </div>
+
 
                             <div class="col-sm-12 mt-3" style="text-align: right;" id="div_button_submit">
                                 <button type="button" class="btn btn-danger" onclick="submit(4)">Batalkan Draft</button>
@@ -216,6 +237,8 @@
 
     <script>
 
+        var jenis_maintenance = {{ $jenis_maintenance }};
+
 
         jQuery(document).ready(function() {
             $(".summernote").summernote({
@@ -225,7 +248,10 @@
                 focus: !1
             }), $(".inline-editor").summernote({
                 airMode: !0
-            })
+            });
+
+            change_rekom_kondisi_aset();
+
         }), window.edit = function() {
             $(".click2edit").summernote()
         }, window.save = function() {
@@ -267,6 +293,29 @@
                     
                 }
             });
+        }
+
+        function change_rekom_kondisi_aset(){
+            console.log('hit'+jenis_maintenance);
+
+            var rekom_kondisi_aset = $('select[name="rekom_kondisi_aset"]').val();
+
+            if(jenis_maintenance == 2){
+                $('#div_ajukan_maintenance').hide();
+                $('#idajukanmaintenance').val(0);
+                //kalibrasi
+                return;
+            }
+            else{
+                if(rekom_kondisi_aset == 2 || rekom_kondisi_aset == 3){
+                    $('#div_ajukan_maintenance').show();
+                }
+                else{
+                    $('#div_ajukan_maintenance').hide();
+                    $('#idajukanmaintenance').val(1);
+                }
+            }
+            
         }
 
         

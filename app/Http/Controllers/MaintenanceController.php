@@ -189,13 +189,13 @@ class MaintenanceController extends Controller
 					})
 					->leftJoin('satuan_maintenance as sm_maintenance', 'a.satuan_jarak_maintenance', '=', 'sm_maintenance.idsatuan_maintenance')
 					->leftJoin('satuan_maintenance as sm_kalibrasi', 'a.satuan_jarak_kalibrasi', '=', 'sm_kalibrasi.idsatuan_maintenance')
-					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.terjadwal_maintenance', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 
+					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.terjadwal_maintenance', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan as satuan_maintenance', 'sm_kalibrasi.satuan as satuan_kalibrasi', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'1\' THEN 1 ELSE 0 END) as jumlah_pj_kalibrasi'),
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'2\' THEN 1 ELSE 0 END) as jumlah_pj_maintenance'))
 					->where('a.idunit_kerja', $idunit_kerja)
 					->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
-					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 
+					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan', 'sm_kalibrasi.satuan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->orderBy('a.kode_barang_aset', 'asc')
@@ -214,13 +214,13 @@ class MaintenanceController extends Controller
 					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
 					->leftJoin('satuan_maintenance as sm_maintenance', 'a.satuan_jarak_maintenance', '=', 'sm_maintenance.idsatuan_maintenance')
 					->leftJoin('satuan_maintenance as sm_kalibrasi', 'a.satuan_jarak_kalibrasi', '=', 'sm_kalibrasi.idsatuan_maintenance')
-					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.terjadwal_maintenance', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 
+					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.terjadwal_maintenance', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan as satuan_maintenance', 'sm_kalibrasi.satuan as satuan_kalibrasi', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'1\' THEN 1 ELSE 0 END) as jumlah_pj_kalibrasi'),
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'2\' THEN 1 ELSE 0 END) as jumlah_pj_maintenance'))
 					->where('a.idunit_kerja', $idunit_kerja)
 					->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
-					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 
+					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan', 'sm_kalibrasi.satuan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->orderBy('a.kode_barang_aset', 'asc')
@@ -263,13 +263,13 @@ class MaintenanceController extends Controller
 							 ->where('pr.iduser', session('userdata')['iduser'])
 							 ->where('pr.status', true);
 					})
-					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset',
+					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->where('a.idunit_kerja', $idunit_kerja)
 					->where(DB::RAW('a.terjadwal_maintenance = false  OR a.terjadwal_maintenance IS NULL'))
 					->where(DB::RAW('a.terjadwal_kalibrasi = false OR a.terjadwal_kalibrasi IS NULL'))
 					->orderBy('a.kode_barang_aset', 'asc')
-					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset',
+					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset','a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->get();
 		}
@@ -278,13 +278,13 @@ class MaintenanceController extends Controller
 					->join('simba.ruang as r', 'a.idruang', '=', 'r.id')
 					->join('simba.gedung as g', 'r.id_gedung', '=', 'g.id')
 					->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')
-					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 
+					->select('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->where('a.idunit_kerja', $idunit_kerja)
 					->where(DB::RAW('a.terjadwal_maintenance = false  OR a.terjadwal_maintenance IS NULL'))
 					->where(DB::RAW('a.terjadwal_kalibrasi = false OR a.terjadwal_kalibrasi IS NULL'))
 					->orderBy('a.kode_barang_aset', 'asc')
-					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset',
+					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset','a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 					->get();
 		}

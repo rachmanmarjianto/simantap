@@ -92,7 +92,8 @@ class AsetController extends Controller
 							->where('km.status', '=', true);
 					})
 					->where('a.idunit_kerja', $idunitkerja)
-					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang',
+					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 
+							'a.kondisi_barang', 'a.keterangan',
 							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
 					->get();
 		}
@@ -106,7 +107,7 @@ class AsetController extends Controller
 							->where('km.status', '=', true);
 					})
 					->where('a.idunit_kerja', $idunitkerja)
-					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang',
+					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang', 'a.keterangan',
 							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
 					->get();
 
@@ -115,6 +116,29 @@ class AsetController extends Controller
 		
 
 		return view($this->setting_folder_view.'.asetunitkerja', compact('menu', 'submenu', 'aset', 'unitkerja', 'idunitkerja') );
+	}
+
+	public function simpan_keterangan(Request $req){
+		$kode_barang_aset = $req->kodeaset;
+		$keterangan = $req->keterangan;
+
+		try {
+			DB::table('aset')
+				->where('kode_barang_aset', $kode_barang_aset)
+				->update([
+					'keterangan' => $keterangan
+				]);
+		} catch (\Exception $e) {
+			return back()->with('status', [
+				'status' => 'danger',
+				'message' => 'Gagal menyimpan keterangan: ' . $e->getMessage()
+			]);
+		}
+
+		return back()->with('status', [
+			'status' => 'success',
+			'message' => 'Keterangan berhasil disimpan'
+		]);
 	}
 
 	public function tambahalat_unitkerja($idunitkerja){

@@ -57,7 +57,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">Nama Aset</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{{ $aset->nama_barang }} - {{ $aset->merk_barang }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $aset->nama_barang }} - {{ $aset->merk_barang }} {{ $aset->keterangan }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -100,10 +100,15 @@
                                     <label class="col-sm-3 col-form-label">Jenis Maintenance</label>
                                     <div class="col-sm-8">
                                         <select name="jenis_maintenance" id="idjenis_maintenance" class="form-control" onchange="loadform()" required>
+                                            @if(in_array(1, $pj_maintenance))
                                             <option value="1">Kalibrasi Internal</option>
                                             <option value="2">Kalibrasi Eksternal</option>
+                                            @endif
+
+                                            @if(in_array(2, $pj_maintenance))
                                             <option value="3">Maintenance Internal</option>
                                             <option value="4">Maintenance Eksternal</option>
+                                            @endif
                                         </select>
                                     </div>
                                     <div class="col-sm-1" id="loader_jenis_maintenance">

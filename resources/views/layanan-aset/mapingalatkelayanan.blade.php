@@ -78,7 +78,7 @@
                                                     </td>
                                                     <td>{{ $a->kode_barang_aset }}</td>
                                                     <td>{{ $a->nama_barang }}</td>
-                                                    <td>{{ $a->merk_barang }}</td>
+                                                    <td>{{ $a->merk_barang }}<br>{{ $a->keterangan }}</td>
                                                     <td>{{ $a->tahun_aset }}</td>
                                                     <td>{{ $a->nama_ruang }}#{{ $a->nama_gedung }}#{{ $a->nama_kampus }}</td>
                                                     <td><input type="number" class="form-control input-default " name="waktu_ideal[{{$i}}]" value="{{$a->waktu_penggunaan_ideal_min}}"></td>
@@ -133,7 +133,7 @@
                             <tr>
                                 <td>{{ $a->kode_barang_aset }}</td>
                                 <td>{{ $a->nama_barang }}</td>
-                                <td>{{ $a->merk_barang }}</td>
+                                <td>{{ $a->merk_barang }}<br>{{ $a->keterangan }}</td>
                                 <td>{{ $a->tahun_aset }}</td>
                                 <td>{{ $a->nama_ruang }}#{{ $a->nama_gedung }}#{{ $a->nama_kampus }}</td>
                                 <td id="btntambah-{{ $a->kode_barang_aset }}">

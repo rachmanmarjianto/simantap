@@ -113,7 +113,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Merk Barang</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" value="{{ $maintenance_aset->merk_barang }}" readonly>
+                                    <input type="text" class="form-control" value="{{ $maintenance_aset->merk_barang }} {{ $maintenance_aset->keterangan }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -219,11 +219,37 @@
                                     <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
                                 </div>
                             </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Rekomendasi Status Aset</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" id="sel1" name="rekom_kondisi_aset" form="form_batalkan_ajuan" onchange="change_rekom_kondisi_aset()">
+                                        <option value="1" @if($maintenance_aset->rekom_kondisi_aset == 1) selected @endif>Baik</option>
+                                        <option value="2" @if($maintenance_aset->rekom_kondisi_aset == 2) selected @endif>Rusak Ringan</option>
+                                        <option value="3" @if($maintenance_aset->rekom_kondisi_aset == 3) selected @endif>Rusak Berat</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" id="div_ajukan_maintenance" style="display: none;">
+                                <label class="col-sm-2 col-form-label">Ajukan permintaan Maintenance?</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" id="idajukanmaintenance" name="ajukan_maintenance" form="form_batalkan_ajuan">
+                                        <option value="1" @if($maintenance_aset->permintaan_maintenance == 1) selected @endif>Ya</option>
+                                        <option value="0" @if($maintenance_aset->permintaan_maintenance == 0) selected @endif>Tidak</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
 
 
                             @if($maintenance_aset->status == 2)
                             <div class="col-sm-12 mt-3" style="text-align: right;" id="div_button_submit">
+                                @if(session('userdata')['idrole'] == 4)
+                                <button type="button" class="btn btn-success mr-2" onclick="submit(3)">Verifikasi</button>
+                                @endif
+                                
                                 <button type="button" class="btn btn-danger" onclick="submit(1)">Batalkan Ajuan</button>
+
                             </div>
                             @endif
 
@@ -310,6 +336,7 @@
         {{-- <input type="hidden" name="idtemplate_maintenance" value="{{ $template[0]->idtemplate_maintenance }}"> --}}
         <input type="hidden" name="idmaintenance_aset" value="{{ $maintenance_aset->idmaintenance_aset }}">
         <input type="hidden" name="status" id="idstatus">
+        <input type="hidden" name="kode_barang_aset" value="{{ $maintenance_aset->kode_barang_aset }}">
     </form>
 
  
@@ -323,6 +350,8 @@
 
     <script>
 
+        var jenis_maintenance = {{ $jenis_maintenance }};
+
 
         jQuery(document).ready(function () {
             $(".summernote").summernote({
@@ -331,6 +360,8 @@
                 focus: false
             }).summernote('disable');
 
+            change_rekom_kondisi_aset();
+
         });
 
 
@@ -338,6 +369,9 @@
 
             if(status == 1){
                 var warning = "Batalkan Ajuan ?";
+            }
+            else if(status == 3){
+                var warning = "Verifikasi Ajuan ?";
             }
             else{
                 var warning = "";
@@ -360,6 +394,27 @@
             });
         }
 
+        function change_rekom_kondisi_aset(){
+
+            var rekom_kondisi_aset = $('select[name="rekom_kondisi_aset"]').val();
+
+            if(jenis_maintenance == 2){
+                $('#div_ajukan_maintenance').hide();
+                $('#idajukanmaintenance').val(0);
+                //kalibrasi
+                return;
+            }
+            else{
+                if(rekom_kondisi_aset == 2 || rekom_kondisi_aset == 3){
+                $('#div_ajukan_maintenance').show();
+                }
+                else{
+                    $('#div_ajukan_maintenance').hide();
+                    $('#idajukanmaintenance').val(1);
+                }
+            }
+            
+        }
         
     </script>
         

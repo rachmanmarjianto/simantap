@@ -64,7 +64,7 @@
                                         <tr>
                                             <td rowspan="2" title="aktifasi kalibrasi dan maintenance" style="cursor:pointer" onclick="aktifasikalibrasimaintenance('{{ $a->kode_barang_aset }}')">
                                                 ({{ $a->kode_barang_aset }})<br>
-                                                {{ $a->nama_barang }} - {{ $a->merk_barang }} <br>
+                                                {{ $a->nama_barang }} - {{ $a->merk_barang }} {{ $a->keterangan }}<br>
                                                 Tahun Aset: {{ $a->tahun_aset }}
                                             </td>
                                             <td>{{ $a->nama_ruang }} - {{ $a->nama_gedung }} - {{ $a->nama_kampus }}</td>
