@@ -57,6 +57,7 @@ class LoginController extends Controller
 					->where('role_user.status', 't')
 					->where('role_user.is_delete', 0)
 					->first();
+					
 				if ($pengguna)
 				{
 

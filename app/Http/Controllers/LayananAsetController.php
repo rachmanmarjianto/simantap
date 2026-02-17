@@ -119,6 +119,7 @@ class LayananAsetController extends Controller
 						->join('simba.kampus as k', 'g.id_kampus', '=', 'k.id')						
 						->select('a.*', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
 						->where('r.id_unit_kerja', $idunitkerja)
+						->where('a.status', 't')
 						->get();
 
 		$layanan = DB::table('layanan as l')
@@ -134,6 +135,7 @@ class LayananAsetController extends Controller
 							->select('a.*', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'la.is_deleted', 
 									'la.waktu_penggunaan_ideal_min', 'la.idlayanan_aset', 'la.no_urut')
 							->where('la.idlayanan', $idlayanan)
+							->where('a.status', 't')
 							->orderBy('la.no_urut', 'asc')
 							->get();
 
@@ -144,6 +146,32 @@ class LayananAsetController extends Controller
 
 	public function prosesmapingalatkelayanan(Request $req){
 		// dd($req->all());
+
+		$cek1 = DB::table('aset')
+					->where('kode_barang_aset', $req->kode_barang)
+					->first();
+
+		if($cek1 == null){
+			return response()->json([
+				'code' => 400,
+				'status' => 'danger',
+				'message' => 'Barang Aset tidak ditemukan'
+			]);
+		}
+		else if($cek1->status != 't'){
+			return response()->json([
+				'code' => 400,
+				'status' => 'danger',
+				'message' => 'Barang Aset tidak aktif'
+			]);
+		}
+		else if($cek1->idunit_kerja != $req->idunitkerja){
+			return response()->json([
+				'code' => 400,
+				'status' => 'danger',
+				'message' => 'Barang Aset tidak berada pada unit kerja yang dipilih'
+			]);
+		}
 
 		$cek = DB::table('layanan_aset as la')
 					->where('la.kode_barang_aset', $req->kode_barang)
@@ -160,6 +188,42 @@ class LayananAsetController extends Controller
 		date_default_timezone_set('Asia/Jakarta');
 		$ts = date('Y-m-d H:i:s');
 
+		//**** persiapan Set Penanggung Jawab Maintenance, yaitu semua operator layanan **************/
+
+		$operator_aset = DB::table('operator_layanan as ol')
+							->where('ol.idlayanan', $req->idlayanan)
+							->where('ol.is_deleted', 0)
+							->where('ol.status', 't')
+							->select('ol.iduser')
+							->get();
+
+		$arr_operator_aset = [];
+		foreach($operator_aset as $operator){
+			$arr_operator_aset[] = array(
+				'iduser' => $operator->iduser,
+				'kode_barang_aset' => $req->kode_barang,
+				'created_at' => $ts,
+				'created_by' => session('userdata')['iduser'],
+				'status' => 't',
+				'jenis_maintenance' => '1',
+			);
+
+			$arr_operator_aset[] = array(
+				'iduser' => $operator->iduser,
+				'kode_barang_aset' => $req->kode_barang,
+				'created_at' => $ts,
+				'created_by' => session('userdata')['iduser'],
+				'status' => 't',
+				'jenis_maintenance' => '2',
+			);
+		}
+
+		// dd($arr_operator_aset);
+		
+
+		//**************************************************************** */
+
+		//**** persiapan tambahkan alat ke layanan ******************/
 		$jumlah = DB::table('layanan_aset')
 			->where('idlayanan', $req->idlayanan)
 			->count();
@@ -171,21 +235,26 @@ class LayananAsetController extends Controller
 			'created_at' => $ts,
 			'no_urut' => $jumlah + 1,
 		);
+		//*************************************************** */
 
 		try {
+			DB::beginTransaction();
 			DB::table('layanan_aset')->insert($arrinsert);
+			DB::table('pj_maintenance')->insert($arr_operator_aset);
+			DB::table('aset')->where('kode_barang_aset', $req->kode_barang)->update(['terjadwal_kalibrasi' => true, 'terjadwal_maintenance' => true]);
+			DB::commit();
 			return response()->json([
 				'code' => 200,
 				'status' => 'success',
 				'message' => 'Mapping alat ke layanan berhasil disimpan'
 			]);
 		} catch (\Exception $e) {
+			DB::rollBack();
 			return response()->json([
 				'code' => 500,
 				'status' => 'danger',
 				'message' => 'Terjadi kesalahan saat menyimpan: ' . $e->getMessage()
 			]);
-			
 		}
 	}
 
@@ -399,6 +468,13 @@ class LayananAsetController extends Controller
 		]);
 
 		return redirect()->route($this->setting_route_prefix.'index');
+	}
+
+	public function testkamera(){
+		$menu = 'master';
+		$submenu = 'layanan_aset';
+
+		return view('kamera', compact('menu', 'submenu') );
 	}
 
 }

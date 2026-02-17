@@ -48,6 +48,7 @@ class MaintenanceController extends Controller
 										DB::raw('SUM(CASE WHEN pm.status = true AND pm.jenis_maintenance = \'1\' THEN 1 ELSE 0 END) as juml_pj_kalibrasi'))
 							->whereRaw(('a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true'))
 							->where('pm.status', true)
+							->where('a.status', true)
 							->groupBy('a.idunit_kerja', 'a.kode_barang_aset', 'a.terjadwal_maintenance')
 							->orderBy('a.idunit_kerja', 'asc')
 							->get();
@@ -87,6 +88,7 @@ class MaintenanceController extends Controller
 							->where('a.idunit_kerja', session('userdata')['idunit_kerja'])
 							->whereRaw(('a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true'))
 							->where('pm.status', true)
+							->where('a.status', true)
 							->groupBy('a.idunit_kerja', 'a.kode_barang_aset', 'a.terjadwal_maintenance')
 							->orderBy('a.idunit_kerja', 'asc')
 							->get();
@@ -124,6 +126,7 @@ class MaintenanceController extends Controller
 							->where('a.idunit_kerja', session('userdata')['idunit_kerja'])
 							->whereRaw(('a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true'))
 							->where('pm.status', true)
+							->where('a.status', true)
 							->groupBy('a.idunit_kerja', 'a.kode_barang_aset', 'a.terjadwal_maintenance')
 							->orderBy('a.idunit_kerja', 'asc')
 							->get();
@@ -194,6 +197,7 @@ class MaintenanceController extends Controller
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'1\' THEN 1 ELSE 0 END) as jumlah_pj_kalibrasi'),
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'2\' THEN 1 ELSE 0 END) as jumlah_pj_maintenance'))
 					->where('a.idunit_kerja', $idunit_kerja)
+					->where('a.status', true)
 					->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
 					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan', 'sm_kalibrasi.satuan',
@@ -219,6 +223,7 @@ class MaintenanceController extends Controller
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'1\' THEN 1 ELSE 0 END) as jumlah_pj_kalibrasi'),
 								DB::raw('SUM(CASE WHEN pm.jenis_maintenance = \'2\' THEN 1 ELSE 0 END) as jumlah_pj_maintenance'))
 					->where('a.idunit_kerja', $idunit_kerja)
+					->where('a.status', true)
 					->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
 					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.satuan_jarak_maintenance', 'a.keterangan',
 								'a.terjadwal_kalibrasi', 'a.jarak_kalibrasi', 'a.satuan_jarak_kalibrasi', 'sm_maintenance.satuan', 'sm_kalibrasi.satuan',
@@ -268,6 +273,7 @@ class MaintenanceController extends Controller
 					->where('a.idunit_kerja', $idunit_kerja)
 					->where(DB::RAW('a.terjadwal_maintenance = false  OR a.terjadwal_maintenance IS NULL'))
 					->where(DB::RAW('a.terjadwal_kalibrasi = false OR a.terjadwal_kalibrasi IS NULL'))
+					->where('a.status', true)
 					->orderBy('a.kode_barang_aset', 'asc')
 					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset','a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')
@@ -283,6 +289,7 @@ class MaintenanceController extends Controller
 					->where('a.idunit_kerja', $idunit_kerja)
 					->where(DB::RAW('a.terjadwal_maintenance = false  OR a.terjadwal_maintenance IS NULL'))
 					->where(DB::RAW('a.terjadwal_kalibrasi = false OR a.terjadwal_kalibrasi IS NULL'))
+					->where('a.status', true)
 					->orderBy('a.kode_barang_aset', 'asc')
 					->groupBy('a.kode_barang_aset', 'a.idunit_kerja', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset','a.keterangan',
 								'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus')

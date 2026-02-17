@@ -27,6 +27,8 @@ Route::get('/', function () {
 	return redirect()->route('login');
 });
 
+
+
 Route::get('/login/', [LoginController::class, 'index'])->name('login');
 Route::post('/login/', [LoginController::class, 'masuk'])->name('login_masuk');
 

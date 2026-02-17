@@ -69,8 +69,8 @@
 							<li @if($submenu == 'alatlab') class="mm-active" @endif><a @if($submenu == 'alatlab') class="mm-active" @endif href="{{ route('aset_index') }}">Alat Lab</a></li>
 							@if(session('userdata')['layanan'] == true || session()->get('userdata')['idrole'] == '1' )
 							<li @if($submenu == 'layanan') class="mm-active" @endif><a @if($submenu == 'layanan') class="mm-active" @endif href="{{ route('layanan_index') }}">Layanan</a></li>
-							<li @if($submenu == 'layanan_aset') class="mm-active" @endif><a @if($submenu == 'layanan_aset') class="mm-active" @endif href="{{ route('layanan_aset_index') }}">Layanan-Alat</a></li>
 							<li @if($submenu == 'layanan_operator') class="mm-active" @endif><a @if($submenu == 'layanan_operator') class="mm-active" @endif href="{{ route('layanan_operator_index') }}">Layanan-Operator</a></li>
+							<li @if($submenu == 'layanan_aset') class="mm-active" @endif><a @if($submenu == 'layanan_aset') class="mm-active" @endif href="{{ route('layanan_aset_index') }}">Layanan-Alat</a></li>
 							@endif
 							<li @if($submenu == 'maintenance_alat') class="mm-active" @endif><a @if($submenu == 'maintenance_alat') class="mm-active" @endif href="{{ route('maintenance_alat_index') }}">Maintenance Alat</a></li>
 							<li @if($submenu == 'form_maintenance') class="mm-active" @endif><a @if($submenu == 'form_maintenance') class="mm-active" @endif href="{{ route('form_maintenance_index') }}">Form Maintenance</a></li>							

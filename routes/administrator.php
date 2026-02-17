@@ -108,6 +108,8 @@ Route::middleware(['akses:1,2'])->group(function () {
     Route::post('/'.$tmp_prefix.'/prosesmapingalatkelayanan', [LayananAsetController::class, 'prosesmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_tambah_alat');
     Route::post('/'.$tmp_prefix.'/simpanmapingalatkelayanan', [LayananAsetController::class, 'simpanmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_simpan');
     Route::post('/'.$tmp_prefix.'/hapusmapingalatkelayanan', [LayananAsetController::class, 'hapusmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_hapus_alat');
+
+	Route::get('/'.$tmp_prefix.'/testkamera', [LayananAsetController::class, 'testkamera'])->name($tmp_prefix.'_testkamera');
 	
 	$tmp_prefix = 'layanan_operator';
 	Route::get('/'.$tmp_prefix.'/', [LayananOperatorController::class, 'index'])->name($tmp_prefix.'_index');
