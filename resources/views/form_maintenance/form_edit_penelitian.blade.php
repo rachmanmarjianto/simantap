@@ -55,8 +55,7 @@
                                 <label>Pilih Peruntukan Form</label>
                                 <select class="form-control" id="sel1" name="jenis_form" onchange="ubahjenisform(this.value)">
                                     <option value="">-- Pilih Jenis Form --</option>
-                                    <option value="1" {{ $template[0]->jenis_maintenance == 1 ? 'selected' : '' }}>Kalibrasi</option>
-                                    <option value="2" {{ $template[0]->jenis_maintenance == 2 ? 'selected' : '' }}>Maintenance</option>
+                                    <option value="3" {{ $template[0]->jenis_maintenance == 3 ? 'selected' : '' }}>Penelitian</option>
                                 </select>
                             </div>
                         </div>
@@ -78,52 +77,44 @@
                             
                         </div>
                         <div class="card-body">
-                            <h2 style="text-align: center">DATA {{ $template[0]->jenis_maintenance == 1 ? 'KALIBRASI' : 'MAINTENANCE' }}</h2>
+                            <h2 style="text-align: center">FORM PELAKSANAAN {{ $template[0]->jenis_maintenance == 3 ? 'PENELITIAN' : 'PRAKTIKUM' }}</h2>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Kode Barang</label>
+                                <label class="col-sm-2 col-form-label">Topik Penelitian</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{ Wajib }" readonly>
                                 </div>
                                 <div class="col-sm-1">
                                     1
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Nama Barang</label>
+                                <label class="col-sm-2 col-form-label">Dosen Pembimbing</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{ Wajib }" readonly>
                                 </div>
                                 <div class="col-sm-1">
                                     2
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Merk Barang</label>
+                                <label class="col-sm-2 col-form-label">Tanggal Mulai</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{ Wajib }" readonly>
                                 </div>
                                 <div class="col-sm-1">
                                     3
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tanggal {{ $template[0]->jenis_maintenance == 1 ? 'Kalibrasi' : 'Maintenance' }}</label>
+                                <label class="col-sm-2 col-form-label">Tanggal Akhir</label>
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{ Wajib }" readonly>
                                 </div>
                                 <div class="col-sm-1">
                                     4
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tempat {{ $template[0]->jenis_maintenance == 1 ? 'Kalibrasi' : 'Maintenance' }}</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
-                                </div>
-                                <div class="col-sm-1">
-                                    5
-                                </div>
-                            </div>
+
                             <form action="{{ route('form_maintenance.edit.simpan_nilai_default') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="idtemplate_maintenance" value="{{ $template[0]->idtemplate_maintenance }}">
@@ -189,26 +180,145 @@
                                     <div class="col-sm-1"></div>
                                 </div>
                             </form>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Personil Pelaksana</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+
+                            <div class="form-group col-md-12" style="padding-left:0px; padding-right:0px">
+                                <label>Instrumen yang akan digunakan (wajib)</label>
+                                <div class="col-sm-11">
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered verticle-middle table-responsive-sm" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col">Kode Barang</th>
+                                                    <th scope="col">Nama Barang</th>
+                                                    <th scope="col">Tujuan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
                                 </div>
                                 <div class="col-sm-1">
                                     
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Penanggung Jawab Ruang</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+
+                            <div class="form-group col-md-12" style="padding-left:0px; padding-right:0px">
+                                <label>Bahan padat / cair yang diajukan (wajib)</label>
+                                <div class="col-sm-11">
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered verticle-middle table-responsive-sm" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col">Nama Bahan</th>
+                                                    <th scope="col">Spisifikasi</th>
+                                                    <th scope="col">Jumlah</th>
+                                                    <th scope="col">Satuan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
                                 </div>
                                 <div class="col-sm-1">
                                     
                                 </div>
                             </div>
+
+                            <div class="form-group col-md-12" style="padding-left:0px; padding-right:0px">
+                                <label>Tanggal dan Waktu Pelaksanaan (wajib)</label>
+                                <div class="col-sm-11">
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered verticle-middle table-responsive-sm" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col">Tanggal</th>
+                                                    <th scope="col">Waktu</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+
+                                </div>
+                                <div class="col-sm-1">
+                                    
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-12" style="padding-left:0px; padding-right:0px">
+                                <div class="d-flex justify-content-between">
+                                    <b>Syarat Ajuan Pelaksanaan {{ $template[0]->jenis_maintenance == 3 ? 'Penelitian' : 'Praktikum' }}</b>
+                                    <span style="cursor:pointer; color:green; font-size:20px" onclick="$('#mdl_tambah_syarat').modal('show')"><i class="fa fa-plus-circle"></i></span>
+                                </div>
+                                <table class="table table-bordered verticle-middle table-responsive-sm" width="100%" id="tbl_syarat_penelitian">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Syarat</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($syarat_penelitian as $syarat)
+                                            <tr id="syarat_row_{{ $syarat->idsyarat_ajuan_penelitian }}">
+                                                <td>{{ $syarat->nama_syarat }}</td>
+                                                <td id="btn_status_syarat_{{ $syarat->idsyarat_ajuan_penelitian }}">
+                                                    @if($syarat->status == 1)
+                                                        <button class="btn btn-success btn-sm" onclick="gantistatussyarat({{ $syarat->idsyarat_ajuan_penelitian }}, 0)">Aktif</button>
+                                                    @else
+                                                        <button class="btn btn-danger btn-sm" onclick="gantistatussyarat({{ $syarat->idsyarat_ajuan_penelitian }}, 1)">Tidak Aktif</button>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                            
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mdl_tambah_syarat">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group col-md-12">
+                        <label>Syarat</label>
+                        <input type="text" class="form-control" name="nama_syarat" id="mdl_nm_syarat" value="">
+                    </div>
+                </div>
+                <div class="modal-footer" id="mdl_tambah_syarat_button">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="tambahkan_syarat()">Simpan</button>
+                </div>
+                <div class="modal-footer" id="mdl_tambah_syarat_button_loader" style="display:none;">
+                    <button type="button" class="btn btn-secondary" disabled>Close</button>
+                    <button type="button" class="btn btn-primary" disabled>Menyimpan...</button>
                 </div>
             </div>
         </div>
@@ -263,6 +373,16 @@
                                 <input type="text" class="form-control" name="urutan" id="mdl_urutan_element" readonly>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Jenis Element </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="mdl_sel_jenis_element" name="jenis_element" onchange="mld_ubahjeniselemen(this.value)">
+                                    <option value="1">Judul Topic</option>
+                                    <option value="2">Input Field</option>
+                                    <option value="3">Text Editor</option>
+                                </select>
+                            </div>                        
+                        </div>
 
                         <div class="form-group row" >
                             <label class="col-sm-2 col-form-label">Level</label>
@@ -274,17 +394,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Jenis Element </label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="mdl_sel_jenis_element" name="jenis_element" onchange="mld_ubahjeniselemen(this.value)">
-                                    <option value="1">Judul Topic</option>
-                                    <option value="2">Input Field</option>
-                                    <option value="3">Text Editor</option>
-                                </select>
-                            </div>                        
-                        </div>                        
 
                         <div id="mdl_parent">
                             <div class="form-group row" >
@@ -307,14 +416,9 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" id="mdl_tambah_elemen_btn">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="submit_mdl_form()">Simpan</button>
-                </div>
-                <div class="modal-footer" id="mdl_tambah_elemen_loader" style="text-align:center; display:none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('mdl_form_tambah_elemen').submit();">Simpan</button>
                 </div>
             </div>
         </div>
@@ -364,7 +468,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('mdl_edit_elemen.simpan_edit_elemen').submit();">Simpan</button>
+                    <button type="button" class="btn btn-primary" onclick="simpanmdlForm(this)">Simpan</button>
                 </div>
             </div>
         </div>
@@ -389,7 +493,7 @@
 
     <script>
 
-        var jumlah_elemen = {{ count($isitemplate) + 5 }};
+        var jumlah_elemen = {{ count($isitemplate) + 4 }};
 
         jQuery(document).ready(function() {
             $(".summernote").summernote({
@@ -406,11 +510,57 @@
             $(".click2edit").summernote("destroy")
         };
 
-        function submit_mdl_form(){
-            $('#mdl_tambah_elemen_btn').hide();
-            $('#mdl_tambah_elemen_loader').show();
+        function tambahkan_syarat(){
+                $('#mdl_tambah_syarat_button').hide();
+                $('#mdl_tambah_syarat_button_loader').show();
 
-            document.getElementById('mdl_form_tambah_elemen').submit();
+                var nama_syarat = document.getElementById('mdl_nm_syarat').value;
+                if(nama_syarat == null || nama_syarat == ''){
+                    alert('Nama syarat tidak boleh kosong');
+                    return;
+                }
+    
+                // Simpan syarat ke database
+                $.ajax({
+                    url: "{{ route('form_maintenance.tambah_syarat_penelitian') }}",
+                    type: "POST",
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        idtemplate_maintenance: '{{ $template[0]->idtemplate_maintenance }}',
+                        nama_syarat: nama_syarat
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        if(response.code == 200){
+                            var tablesyarat = $('#tbl_syarat_penelitian tbody');
+
+                            var newRow = '<tr id="syarat_row_'+response.data['idsyarat_ajuan_penelitian']+'">'+
+                                            '<td>'+response.data.nama_syarat+'</td>'+
+                                            '<td id="btn_status_syarat_'+response.data['idsyarat_ajuan_penelitian']+'"><button class="btn btn-success btn-sm" onclick="gantistatussyarat('+response.data['idsyarat_ajuan_penelitian']+', 0)">Aktif</button></td>'+
+                                        '</tr>';
+
+                            tablesyarat.append(newRow);
+
+                            $('#mdl_tambah_syarat_button').show();
+                            $('#mdl_tambah_syarat_button_loader').hide();
+                            $('#mdl_nm_syarat').val('');
+                            $('#mdl_tambah_syarat').modal('hide');
+                        }
+                        else{
+                            alert('Gagal menyimpan syarat');
+                            $('#mdl_tambah_syarat_button').show();
+                            $('#mdl_tambah_syarat_button_loader').hide();
+                        }
+                    }
+                });
+        }
+
+        function simpanmdlForm(e){
+            e.preventDefault();
+            e.target.disabled = true;
+            e.target.innerText = 'Menyimpan...';
+            document.getElementById('mdl_edit_elemen.simpan_edit_elemen').submit();
+            
         }
 
         function hapusElemen(){
@@ -434,6 +584,9 @@
 
         function ubahjenisform(val){
             document.getElementById('input_jenis_maintenance').value = val;
+            if(val == null || val == ''){
+                return;
+            }
             document.getElementById('form_ubah_jenis_form').submit();
         }
 
@@ -465,6 +618,7 @@
                 selectparent.options[1] = new Option('Text Editor', '3');
                 // document.getElementById('mdl_sel_jenis_element').selectpicker('refresh');
                 $('#mdl_sel_jenis_element').selectpicker('refresh');
+
 
                 $.ajax({
                     url: "{{ route('get_parent_element') }}",
@@ -518,7 +672,7 @@
                 selectparent.options[2] = new Option('Text Editor', '3');
                 // document.getElementById('mdl_sel_jenis_element').selectpicker('refresh');
                 $('#mdl_sel_jenis_element').selectpicker('refresh');
-                
+
                 document.getElementById('mdl_sel_parent_element').innerHTML = '';
                 document.getElementById('mdl_parent').style.display = 'none';
             }
@@ -548,6 +702,55 @@
                 },
                 error: function(xhr) {
                     alert('ERROR: Terjadi kesalahan saat mengambil data elemen template.');
+                }
+            });
+        }
+
+        function gantistatussyarat(idsyarat_ajuan_penelitian, status_baru){
+            var btn_status = document.getElementById('btn_status_syarat_'+idsyarat_ajuan_penelitian);
+
+            btn_status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status">\
+                                        <span class="sr-only">Loading...</span>\
+                                    </div>';
+        
+           
+
+            $.ajax({
+                url: "{{ route('form_maintenance.ganti_status_syarat_penelitian') }}",
+                type: "POST",
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    idsyarat_ajuan_penelitian: idsyarat_ajuan_penelitian,
+                    status_baru: status_baru
+                },
+                success: function(response) {
+                    if(response.code == 200){
+                        
+                        if(status_baru == 1){
+                            btn_status.innerHTML = '<button class="btn btn-success btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 0)">Aktif</button>';
+                        } else {
+                            btn_status.innerHTML = '<button class="btn btn-danger btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 1)">Tidak Aktif</button>';
+                        }
+                    }
+                    else{
+                        alert('Gagal mengganti status syarat');
+                        if(status_baru == 1){
+                            btn_status.innerHTML = '<button class="btn btn-danger btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 1)">Tidak Aktif</button>';
+                            
+                        } else {
+                            btn_status.innerHTML = '<button class="btn btn-success btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 0)">Aktif</button>';
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    alert('ERROR: Terjadi kesalahan saat mengganti status syarat.');
+                    
+                    if(status_baru == 1){
+                        btn_status.innerHTML = '<button class="btn btn-danger btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 1)">Tidak Aktif</button>';
+                        
+                    } else {
+                        btn_status.innerHTML = '<button class="btn btn-success btn-sm" onclick="gantistatussyarat('+idsyarat_ajuan_penelitian+', 0)">Aktif</button>';
+                    }
                 }
             });
         }

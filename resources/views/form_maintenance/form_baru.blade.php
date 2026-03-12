@@ -1,6 +1,6 @@
 @extends('layout_home')
 
-@section('title', 'Form Maintenance - Form Baru')
+@section('title', 'Form - Form Baru')
 
 @section('page-css')
     <link href="{{ asset('app-assets') }}/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
                 <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('form_maintenance_index') }}">Form Maintenance</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('form_maintenance_index') }}">Form</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('form_maintenance_unit_kerja', ['id' => encrypt($idunit_kerja)]) }}">Detail Unit Kerja</a></li>
                         <li class="breadcrumb-item active"><a href="javascript:void(0)">Form Baru</a></li>
                         
@@ -56,6 +56,7 @@
                                     <select class="form-control" id="jenis_maintenance" name="jenis_maintenance" required>
                                         <option value="1">Kalibrasi</option>
                                         <option value="2">Maintenance</option>
+                                        <option value="3">Penelitian</option>
                                     </select>
                                 </div>
                                 <div class="form-group">

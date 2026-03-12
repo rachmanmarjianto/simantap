@@ -231,4 +231,32 @@ class HomeController extends Controller
 
 	}
 
+	public function halamanpublik()
+	{
+		$aset = DB::table('aset as a')
+					->join('aucc.unit_kerja as uk', 'a.idunit_kerja', '=', 'uk.id_unit_kerja')
+					->where('a.public', 1)
+					->select(
+						'a.kode_barang_aset',
+						'a.nama_barang',
+						'a.merk_barang',
+						'a.keterangan',
+						'uk.nm_unit_kerja as nama_unit_kerja',
+						'a.kode_barang_aset',
+					)
+					->get();
+
+		// dd($aset);
+
+		// $max = count($aset_q);
+
+		// $randomNumbers = array_rand(range(0, $max - 1), 4);
+
+		// foreach ($randomNumbers as $index) {
+		// 	$aset[] = $aset_q[$index];
+		// }
+
+		return view('home.halaman_publik', compact('aset'));
+	}
+
 }

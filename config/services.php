@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'proj_variable' => [
+        'api_get_token_user' => 'pemira',
+        'api_get_token_key' => 'p3m1R4@20211209'
+    ],
+
 ];

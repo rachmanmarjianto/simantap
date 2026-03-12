@@ -126,6 +126,124 @@ class UserController extends Controller
 				]);
 		}
 		else{
+			$curl = curl_init();
+
+			curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://apicybercampus.unair.ac.id/api/token/ambil-token-v2',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => array('user' => config('services.proj_variable.api_get_token_user'),'key' => config('services.proj_variable.api_get_token_key')),
+			CURLOPT_HTTPHEADER => array(
+				'Cookie: _csrf=803c33edb6f5136fcef3ee81cda393ced5ae03c78513b0645a780ce5044e1c96a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22qwoqSEOXxtPGfPwWdqPqszm0oL5_srUf%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
+			),
+			));
+
+			$response = curl_exec($curl);
+
+			curl_close($curl);
+			
+			$token = str_replace('"', '', $response);
+
+			if($request->join_table == 1){
+
+				$curl = curl_init();
+
+				curl_setopt_array($curl, array(
+				CURLOPT_URL => 'https://apicybercampus.unair.ac.id/api/pengguna/info-singkat-pegawai',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => '',
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 0,
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => 'POST',
+				CURLOPT_POSTFIELDS => array('token' => $token,'nip' => $request->nipnik),
+				CURLOPT_HTTPHEADER => array(
+					'Cookie: _csrf=803c33edb6f5136fcef3ee81cda393ced5ae03c78513b0645a780ce5044e1c96a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22qwoqSEOXxtPGfPwWdqPqszm0oL5_srUf%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
+				),
+				));
+
+				$response = curl_exec($curl);
+
+				curl_close($curl);
+				
+				$result = json_decode($response, true);
+				$idprogram_studi = $result[0]['ID_PROGRAM_STUDI'];
+
+			}
+			else if($request->join_table == 2){
+
+				$curl = curl_init();
+
+				curl_setopt_array($curl, array(
+				CURLOPT_URL => 'https://apicybercampus.unair.ac.id/api/pengguna/info-singkat-dosen',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => '',
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 0,
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => 'POST',
+				CURLOPT_POSTFIELDS => array('token' => $token,'nip' => $request->nipnik),
+				CURLOPT_HTTPHEADER => array(
+					'Cookie: _csrf=803c33edb6f5136fcef3ee81cda393ced5ae03c78513b0645a780ce5044e1c96a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22qwoqSEOXxtPGfPwWdqPqszm0oL5_srUf%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
+				),
+				));
+
+				$response = curl_exec($curl);
+
+				curl_close($curl);
+				
+				$result = json_decode($response, true);
+				$idprogram_studi = $result[0]['ID_PROGRAM_STUDI'];
+
+			}
+			else if($request->join_table == 3){
+
+				$curl = curl_init();
+
+				curl_setopt_array($curl, array(
+				CURLOPT_URL => 'https://apicybercampus.unair.ac.id/api/pengguna/info-singkat-mahasiswa',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => '',
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 0,
+				CURLOPT_FOLLOWLOCATION => true,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => 'POST',
+				CURLOPT_POSTFIELDS => array('token' => $token,'nim' => $request->nipnik),
+				CURLOPT_HTTPHEADER => array(
+					'Cookie: _csrf=803c33edb6f5136fcef3ee81cda393ced5ae03c78513b0645a780ce5044e1c96a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22qwoqSEOXxtPGfPwWdqPqszm0oL5_srUf%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
+				),
+				));
+
+				$response = curl_exec($curl);
+
+				curl_close($curl);
+				
+				$result = json_decode($response, true);
+				$idprogram_studi = $result[0]['ID_PROGRAM_STUDI'];
+
+			}
+			else{
+				Session::flash('status', [
+					'status' => 'danger',
+					'message' => 'Join table tidak valid'
+				]);
+				return redirect()->back()->withInput();
+				// Jika join table tidak valid, maka tampilkan error
+				// return response()->json([
+				// 	'code' => 400,
+				// 	'status' => 'error',
+				// 	'message' => 'Join table tidak valid'
+				// ]);
+			}
+
 			
 
 			$array_insert = array(
@@ -137,6 +255,7 @@ class UserController extends Controller
 				'id_pengguna_cyber' => $request->id_cyber,
 				'created_at' => $ts,
 				'status' => true,
+				'idprogram_studi' => $idprogram_studi,
 			);
 			
 

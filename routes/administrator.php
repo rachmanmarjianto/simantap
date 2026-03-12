@@ -14,6 +14,15 @@ use App\Http\Controllers\PjRuangController;
 use App\Http\Controllers\PraktikumController;
 use App\Http\Controllers\PenelitianController;
 use App\Http\Controllers\FormMaintenanceController;
+use App\Http\Controllers\PenelitianMasterController;
+use App\Http\Controllers\PemakaianAsetController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RoleUserController;
+use App\Http\Controllers\FakultasController;
+use App\Http\Controllers\JenjangController;
+use App\Http\Controllers\ProgramStudiController;
+use App\Http\Controllers\RuangController;
+use App\Http\Controllers\TransaksiAlatController;
 
 
 Route::middleware(['akses:1,2'])->group(function () {
@@ -108,8 +117,6 @@ Route::middleware(['akses:1,2'])->group(function () {
     Route::post('/'.$tmp_prefix.'/prosesmapingalatkelayanan', [LayananAsetController::class, 'prosesmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_tambah_alat');
     Route::post('/'.$tmp_prefix.'/simpanmapingalatkelayanan', [LayananAsetController::class, 'simpanmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_simpan');
     Route::post('/'.$tmp_prefix.'/hapusmapingalatkelayanan', [LayananAsetController::class, 'hapusmapingalatkelayanan'])->name($tmp_prefix.'_maping_layanan_unitkerja_hapus_alat');
-
-	Route::get('/'.$tmp_prefix.'/testkamera', [LayananAsetController::class, 'testkamera'])->name($tmp_prefix.'_testkamera');
 	
 	$tmp_prefix = 'layanan_operator';
 	Route::get('/'.$tmp_prefix.'/', [LayananOperatorController::class, 'index'])->name($tmp_prefix.'_index');
@@ -193,6 +200,8 @@ Route::middleware(['akses:1,2,4'])->group(function () {
 	Route::post('/'.$tmp_prefix.'/kapasitas_max_get', [AsetController::class, 'get_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_get');
 	Route::post('/'.$tmp_prefix.'/kapasitas_max_simpan', [AsetController::class, 'simpan_kapasitas_max'])->name($tmp_prefix.'_kapasitas_max_simpan');
 	Route::post('/'.$tmp_prefix.'/keterangan_simpan', [AsetController::class, 'simpan_keterangan'])->name($tmp_prefix.'_keterangan_simpan');
+	Route::post('/'.$tmp_prefix.'/publish', [AsetController::class, 'publish_aset'])->name($tmp_prefix.'_publish_aset');
+	Route::post('/'.$tmp_prefix.'/ubah_status', [AsetController::class, 'ubah_status'])->name($tmp_prefix.'_ubah_status');
 
 	Route::get('/maintenance-alat/', [MaintenanceController::class, 'index'])->name('maintenance_alat_index');
 	Route::get('/maintenance-alat/unitkerja/{id}', [MaintenanceController::class, 'maintenance_unit_kerja'])->name('maintenance_unit_kerja');
@@ -219,7 +228,9 @@ Route::middleware(['akses:1,2,4'])->group(function () {
 	// Route::get('/'.$tmp_prefix.'/edit/{id}', [PermintaanLayananController::class, 'edit'])->name($tmp_prefix.'_edit');
 	// Route::post('/'.$tmp_prefix.'/edit/{id}/simpan', [PermintaanLayananController::class, 'edit_simpan'])->name($tmp_prefix.'_edit_simpan');
 
-	Route::get('/penelitian/', [PenelitianController::class, 'index'])->name('penelitian_index');
+	Route::get('/penelitian_master/', [PenelitianMasterController::class, 'index'])->name('penelitian_master_index');
+
+	Route::get('/penelitian/', [PenelitianController::class, 'index'])->name('penelitian_admin_index');
 
 	Route::get('/praktikum/', [PraktikumController::class, 'index'])->name('praktikum_index');
 
@@ -228,6 +239,7 @@ Route::middleware(['akses:1,2,4'])->group(function () {
 	Route::get('/form_maintenance/buatformbaru/{idunit_kerja}', [FormMaintenanceController::class, 'buat_formbaru'])->name('form_maintenance_create');
 	Route::post('/form_maintenance/simpan_form_baru', [FormMaintenanceController::class, 'simpan_form_baru'])->name('form_maintenance_simpan_form_baru');
 	Route::get('/form_maintenance/editform/{idform}', [FormMaintenanceController::class, 'edit_form'])->name('form_maintenance_edit_form');
+	Route::get('/form_maintenance/editform_penelitian/{idform}', [FormMaintenanceController::class, 'edit_form_penelitian'])->name('form_maintenance_edit_form_penelitian');
 	Route::post('/form_maintenance/ubahstatus_template', [FormMaintenanceController::class, 'ubahstatus_template'])->name('form_maintenance_ganti_status_template');
 	Route::post('/form_maintenance/edit_nama_template', [FormMaintenanceController::class, 'edit_nama_template'])->name('form_maintenance_edit_nama_template');
 	Route::post('/form_maintenance/ubah_jenis_form', [FormMaintenanceController::class, 'ubah_jenis_form'])->name('form_maintenance_ubah_jenis_form');
@@ -237,4 +249,6 @@ Route::middleware(['akses:1,2,4'])->group(function () {
 	Route::post('/form_maintenance/get_elemen_template', [FormMaintenanceController::class, 'get_elemen_template'])->name('form_maintenance.edit.get_isi_template');
 	Route::post('/form_maintenance/simpan_edit_elemen', [FormMaintenanceController::class, 'simpan_edit_elemen'])->name('form_maintenance.simpan_edit_elemen');
 	Route::post('/form_maintenance/hapus_elemen_template', [FormMaintenanceController::class, 'hapus_elemen_template'])->name('form_maintenance.hapus_elemen_template');
+	Route::post('/form_maintenance/tambah_syarat_penelitian', [FormMaintenanceController::class, 'tambah_syarat_penelitian'])->name('form_maintenance.tambah_syarat_penelitian');
+	Route::post('/form_maintenance/ganti_status_syarat_penelitian', [FormMaintenanceController::class, 'ganti_status_syarat_penelitian'])->name('form_maintenance.ganti_status_syarat_penelitian');
 });

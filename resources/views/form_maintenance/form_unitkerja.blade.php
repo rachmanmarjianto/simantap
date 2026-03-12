@@ -1,6 +1,6 @@
 @extends('layout_home')
 
-@section('title', 'Form Maintenance - Detail Unit Kerja')
+@section('title', 'Form - Detail Unit Kerja')
 
 @section('page-css')
     <link href="{{ asset('app-assets') }}/vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
@@ -12,13 +12,13 @@
             <div class="row page-titles mx-0">
                 <div class="col-sm-6 p-md-0">
                     <div class="welcome-text">
-                        <h4>Form Maintenance</h4>
+                        <h4>Form</h4>
                     </div>
                 </div>
                 <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('form_maintenance_index') }}">Form Maintenance</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('form_maintenance_index') }}">Form</a></li>
                         <li class="breadcrumb-item active"><a href="javascript:void(0)">Detail Unit Kerja</a></li>
                     </ol>
                 </div>
@@ -66,8 +66,10 @@
                                             @if(!is_null($temp->jenis_maintenance))
                                                 @if($temp->jenis_maintenance == 1)
                                                     @php $jenis = "Kalibrasi"; @endphp
-                                                @else
+                                                @elseif($temp->jenis_maintenance == 2)
                                                     @php $jenis = "Maintenance"; @endphp
+                                                @elseif($temp->jenis_maintenance == 3)
+                                                    @php $jenis = "Penelitian"; @endphp
                                                 @endif
                                                 <tr>
                                                     <td>{{ $temp->idtemplate_maintenance }}</td>

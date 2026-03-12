@@ -16,7 +16,175 @@ class LoginController extends Controller
 		return view('login');
 	}
 
-	public function masuk(Request $request)
+	public function masuk(Request $request){
+		$validatedData = $request->validate([
+			'username' => ['required', 'integer', 'min:0'],
+			'password' => ['required', 'min:4', 'max:255'],
+		]);
+
+		date_default_timezone_set('Asia/Jakarta');
+		$ts = date('Y-m-d H:i:s');
+
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => 'https://apicybercampus.unair.ac.id/api/auth/login',
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_TIMEOUT => 0,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => array('LoginForm[username]' => $validatedData['username'],'LoginForm[password]' => $validatedData['password']),
+			CURLOPT_HTTPHEADER => array(
+				'Cookie: _csrf=26f508d094ffac1a03420541815ba6e835e252bb34be156d7d8f1ef8f1606851a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22ZdzFGZeNiCJDeA_Wiln4ldOl3rwa39rT%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
+			),
+		));
+
+		$response = curl_exec($curl);
+
+		curl_close($curl);
+		
+		$result = json_decode($response, true);
+
+		// dd($result);
+
+		if(isset($result['status']) && $result['status'] == 'success'){
+			// Proses login berhasil
+			$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja', 'uks.layanan', 'uks.penelitian', 'uks.praktikum')
+				->join('role_user', 'user.iduser', '=', 'role_user.iduser')
+				->join('role', 'role_user.idrole', '=', 'role.idrole')
+				->join('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
+				->join('unit_kerja_simantap as uks', 'role_user.idunit_kerja', '=', 'uks.idunit_kerja_simantap')
+				->where('user.nipnik', $validatedData['username'])
+				->where('role_user.status', 't')
+				->where('role_user.is_delete', 0)
+				->first();
+				
+			if ($pengguna)
+			{
+				// Pengguna sudah ada di database lokal, langsung login
+			}
+			else
+			{
+				// return redirect()->back()->with([
+				// 	'status' => 'danger',
+				// 	'message' => 'Login gagal. Silakan coba lagi.'
+				// ]);
+
+				$user = DB::table('aucc.pengguna as p')
+								->where('p.username', $validatedData['username'])
+								->select('p.id_pengguna', 'p.username as nipnik', 'p.nm_pengguna', 'p.gelar_depan', 'p.gelar_belakang', 'p.join_table')
+								->first();
+
+				if($result['data']['join_table'] == 2 ){
+					$idprogram_studi = $result['data']['dosen']['ID_PROGRAM_STUDI'];	
+					$role = 5;				
+				}
+				else if($result['data']['join_table'] == 3){
+					$idprogram_studi = $result['data']['mahasiswa']['ID_PROGRAM_STUDI'];
+					$role = 6;
+				}
+				else{
+					$idprogram_studi = null;
+
+				}
+
+				//=== cek unit kerja sudah ada atau blm ditabel simantap
+				$cek_uk_simantap = DB::table('unit_kerja_simantap')->where('idunit_kerja_simantap', $result['data']['homebase_induk']['ID_UNIT_KERJA'])->first();
+				if(!$cek_uk_simantap){
+					DB::table('unit_kerja_simantap')->insert([
+						'idunit_kerja_simantap' => $result['data']['homebase_induk']['ID_UNIT_KERJA'],
+						'layanan' => 0,
+						'penelitian' => 1,
+						'praktikum' => 1,
+					]);
+				}
+
+				$user_insert = array(
+						'nipnik' => $validatedData['username'],
+						'nama' => $result['data']['name'],
+						'gelar_depan' => $result['data']['gelar_depan'] ?? '',
+						'gelar_belakang' => $result['data']['gelar_belakang'] ?? '',
+						'status'=>'true',
+						'join_table' => $result['data']['join_table'],
+						'created_at' => $ts,
+						'id_pengguna_cyber' => $user->id_pengguna,
+						'internal' => 'true',
+						'idprogram_studi' => $idprogram_studi,
+					);
+
+				try {
+					DB::beginTransaction();
+					
+					$iduser = DB::table('user')->insertGetId($user_insert, 'iduser');
+
+					DB::table('role_user')->insert([
+						'iduser' => $iduser,
+						'idrole' => $role,
+						'idunit_kerja' => $result['data']['homebase_induk']['ID_UNIT_KERJA'],
+						'status' => 't',
+						'is_delete' => 0,
+						'created_at' => $ts
+					]);
+					
+					DB::commit();
+					
+				} catch (\Exception $e) {
+					DB::rollBack();
+					return redirect()->back()->with([
+						'status' => 'danger',
+						'message' => 'Login gagal, DB Error. Silakan coba lagi.'
+					]);
+				}
+
+				$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja', 'uks.layanan', 'uks.penelitian', 'uks.praktikum')
+								->join('role_user', 'user.iduser', '=', 'role_user.iduser')
+								->join('role', 'role_user.idrole', '=', 'role.idrole')
+								->join('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
+								->join('unit_kerja_simantap as uks', 'role_user.idunit_kerja', '=', 'uks.idunit_kerja_simantap')
+								->where('user.nipnik', $validatedData['username'])
+								->where('role_user.status', 't')
+								->where('role_user.is_delete', 0)
+								->first();	
+			}
+
+			
+
+			Auth::login($pengguna);
+
+			session([
+				'userdata' => array(
+					'iduser' => $pengguna->iduser,
+					'nipnik' => $pengguna->nipnik,
+					'nama' => $pengguna->nama,
+					'gelar_depan' => $pengguna->gelar_depan,
+					'gelar_belakang' => $pengguna->gelar_belakang,
+					'idunit_kerja' => $pengguna->idunit_kerja,
+					'idrole' => $pengguna->idrole,
+					'nama_role' => $pengguna->nama_role,
+					'nama_unit_kerja' => $pengguna->nm_unit_kerja,
+					'layanan' => $pengguna->layanan,
+					'penelitian' => $pengguna->penelitian,
+					'praktikum' => $pengguna->praktikum,
+					'idprogram_studi' => $pengguna->idprogram_studi,
+				)
+			]);
+
+			return redirect()->intended('/home')->with('success', 'Login successful!');
+
+		}
+		else
+		{
+			return redirect()->back()->with([
+				'status' => 'danger',
+				'message' => 'Username/Password Salah'
+			]);
+		}
+	}
+
+	public function masuk_old(Request $request)
 	{
 		$validatedData = $request->validate([
 			'username' => ['required', 'integer', 'min:0'],
@@ -47,6 +215,7 @@ class LoginController extends Controller
 			$result = json_decode($response, true);
 			if ( isset($result['message']) and $result['message'] == 'Login berhasil!' )
 			{
+				
 				// Proses login berhasil
 				$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja', 'uks.layanan', 'uks.penelitian', 'uks.praktikum')
 					->join('role_user', 'user.iduser', '=', 'role_user.iduser')
@@ -89,10 +258,7 @@ class LoginController extends Controller
 				}
 				else
 				{
-					return redirect()->back()->with([
-						'status' => 'danger',
-						'message' => 'Pengguna tidak ditemukan'
-					]);
+					dd($result);
 				}
 			}
 			else
@@ -294,6 +460,16 @@ class LoginController extends Controller
 		{
 			echo 'Token Kosong'; die();
 		}
+	}
+
+	public function publik_login()
+	{
+		return view('home.login_publik');
+	}
+
+	public function publik_register()
+	{
+		return view('home.register_publik');
 	}
 
 }

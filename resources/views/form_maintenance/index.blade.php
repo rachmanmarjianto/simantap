@@ -1,18 +1,18 @@
 @extends('layout_home')
-@section('title', 'Form Maintenance')
+@section('title', 'Form')
 @section('content')
 		<div class="content-body">
 			<div class="container-fluid">
 				<div class="row page-titles mx-0">
 					<div class="col-sm-6 p-md-0">
 						<div class="welcome-text">
-							<h4>Form Maintenance</h4>
+							<h4>Form</h4>
 						</div>
 					</div>
 					<div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
 						<ol class="breadcrumb">
 							<li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-							<li class="breadcrumb-item active"><a href="javascript:void(0)">Form Maintenance</a></li>
+							<li class="breadcrumb-item active"><a href="javascript:void(0)">Form</a></li>
 						</ol>
 					</div>
 				</div>
@@ -41,6 +41,7 @@
 												<th  style="text-align: center;">Unit Kerja</th>
 												<th  style="text-align: center;">Form Kalibrasi</th>
 												<th  style="text-align: center;">Form Maintenance</th>
+												<th style="text-align: center;">Form Penelitian</th>
 												<th  style="text-align: center;">Action</th>
 											</tr>
 											
@@ -50,7 +51,8 @@
 											<tr>
 												<td>{{ $uk->nm_unit_kerja }}</td>
 												<td style="text-align: center">{{ $uk->jumlah_form_kalibrasi }}</td>
-												<td style="text-align: center">{{ $uk->jumlah_form_maintenance }}</td>		
+												<td style="text-align: center">{{ $uk->jumlah_form_maintenance }}</td>
+												<td style="text-align: center">{{ $uk->jumlah_form_penelitian }}</td>		
 												<td style="text-align: center">
 													<a href="{{ route('form_maintenance_unit_kerja', ['id' => encrypt($uk->idunit_kerja)]) }}" class="btn btn-rounded btn-primary">Detail</a>
 												</td>

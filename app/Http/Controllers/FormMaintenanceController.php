@@ -22,7 +22,9 @@ class FormMaintenanceController extends Controller
                             ->leftJoin('template_maintenance as tm', 'q1.idunit_kerja', '=', 'tm.idunit_kerja')
                             ->select('q1.idunit_kerja', 'uk.nm_unit_kerja', 
                                         DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'1\' THEN 1 ELSE NULL END), 0) as jumlah_form_kalibrasi'),
-                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'2\' THEN 1 ELSE NULL END), 0) as jumlah_form_maintenance'))
+                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'2\' THEN 1 ELSE NULL END), 0) as jumlah_form_maintenance'),
+                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'3\' THEN 1 ELSE NULL END), 0) as jumlah_form_penelitian'))
+                            ->where('tm.status', true)
                             ->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
                             ->orderBy('uk.nm_unit_kerja', 'asc')
                             ->get();
@@ -32,8 +34,10 @@ class FormMaintenanceController extends Controller
                             ->leftJoin('template_maintenance as tm', 'q1.idunit_kerja', '=', 'tm.idunit_kerja')
                             ->select('q1.idunit_kerja', 'uk.nm_unit_kerja', 
                                         DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'1\' THEN 1 ELSE NULL END), 0) as jumlah_form_kalibrasi'),
-                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'2\' THEN 1 ELSE NULL END), 0) as jumlah_form_maintenance'))
+                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'2\' THEN 1 ELSE NULL END), 0) as jumlah_form_maintenance'),
+                                        DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'3\' THEN 1 ELSE NULL END), 0) as jumlah_form_penelitian'))
                             ->where('q1.idunit_kerja', session('userdata')['idunit_kerja'])
+                            ->where('tm.status', true)
                             ->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
                             ->orderBy('uk.nm_unit_kerja', 'asc')
                             ->get();
@@ -157,6 +161,10 @@ class FormMaintenanceController extends Controller
             exit;
         }
 
+        if($template[0]->jenis_maintenance == 3){
+            return redirect()->route('form_maintenance_edit_form_penelitian', ['idform' => encrypt($idform)]);
+        }
+
         $isitemplate = DB::table('isi_template')
                             ->where('idtemplate_maintenance', $idform)
                             ->where('is_deleted', false)
@@ -209,6 +217,82 @@ class FormMaintenanceController extends Controller
         
 
         return view('form_maintenance.form_edit', compact('menu', 'submenu', 'template', 'isitemplate', 'level_max', 'layout'));
+    }
+
+    public function edit_form_penelitian($idform)
+    {
+        $menu = 'master';
+        $submenu = 'form_maintenance';
+
+        $idform = decrypt($idform);
+
+        $template = DB::table('template_maintenance as tm')
+                        ->select('tm.idtemplate_maintenance', 'tm.idunit_kerja', 'tm.nama_template', 'tm.jenis_maintenance', 'tm.status')
+                        ->where('tm.idtemplate_maintenance', $idform)
+                        ->get();
+
+        if($template[0]->idunit_kerja != session('userdata')['idunit_kerja']){
+            echo "403 Forbidden";
+            exit;
+        }
+
+        $isitemplate = DB::table('isi_template')
+                            ->where('idtemplate_maintenance', $idform)
+                            ->where('is_deleted', false)
+                            ->orderBy('level', 'asc')
+                            ->orderBy('urutan', 'asc')
+                            ->get();
+
+        // dd($isitemplate);
+        $level_max = 0;
+
+        $layout = array();
+
+        foreach($isitemplate as $el){
+            if($el->level > $level_max){
+                $level_max = $el->level;
+            }
+
+            if($el->level == 1){
+                if(!key_exists($el->idisi_template, $layout)){
+                    $layout[$el->idisi_template] = array(
+                        'idisi_template' => $el->idisi_template,
+                        'idtemplate_maintenance' => $el->idtemplate_maintenance,
+                        'jenis_isi' => $el->jenis_isi,
+                        'level' => $el->level,
+                        'nilai_tampil' => $el->nilai_tampil,
+                        'urutan' => $el->urutan,
+                        'parent_id' => $el->parent_id,
+                        'nilai_default' => $el->nilai_default,
+                        'children' => array()
+                    );
+                }
+            }
+            else{
+                $layout[$el->parent_id]['children'][] = array(
+                    'idisi_template' => $el->idisi_template,
+                    'idtemplate_maintenance' => $el->idtemplate_maintenance,
+                    'jenis_isi' => $el->jenis_isi,
+                    'level' => $el->level,
+                    'nilai_tampil' => $el->nilai_tampil,
+                    'urutan' => $el->urutan,
+                    'parent_id' => $el->parent_id,
+                    'nilai_default' => $el->nilai_default
+                );
+            }            
+        }
+
+        $level_max += 1;
+
+        $syarat_penelitian = DB::table('syarat_ajuan_penelitian')
+                                ->where('idtemplate_maintenance', $idform)
+                                ->orderBy('idsyarat_ajuan_penelitian', 'asc')
+                                ->get();
+
+        // dd($template); 
+        
+
+        return view('form_maintenance.form_edit_penelitian', compact('menu', 'submenu', 'template', 'isitemplate', 'level_max', 'layout', 'syarat_penelitian'));
     }
 
     public function edit_nama_template(Request $request)
@@ -464,5 +548,80 @@ class FormMaintenanceController extends Controller
             'status' => 'success',
             'message' => 'Nilai default berhasil disimpan'
         ]);
+    }
+
+    public function tambah_syarat_penelitian(Request $request)
+    {
+        // dd($request->all());
+
+        $idtemplate_maintenance = $request->input('idtemplate_maintenance');
+        $nama_syarat = $request->input('nama_syarat');
+
+        $now = Carbon::now('Asia/Jakarta');
+        $ts = $now->format('Y-m-d H:i:s');
+
+        try {
+            $idsyarat = DB::table('syarat_ajuan_penelitian')->insertGetId([
+                                        'idtemplate_maintenance' => $idtemplate_maintenance,
+                                        'nama_syarat' => $nama_syarat,
+                                        'status' => true
+                                    ], 'idsyarat_ajuan_penelitian');
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 500,
+                'status' => 'danger',
+                'message' => 'Gagal menambah syarat penelitian baru',
+                'data' => []
+            ], 500);
+        }
+
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'message' => 'Syarat penelitian baru berhasil ditambahkan',
+            'data' => [
+                'idsyarat_ajuan_penelitian' => $idsyarat,
+                'nama_syarat' => $nama_syarat
+            ]
+        ], 200);
+    }
+
+    public function ganti_status_syarat_penelitian(Request $request)
+    {
+        // dd($request->all());
+
+        $idsyarat_ajuan_penelitian = $request->input('idsyarat_ajuan_penelitian');
+        $status_baru = $request->input('status');
+
+        if($status_baru == 1){
+            $status_baru = true;
+        } else {
+            $status_baru = false;
+        }
+
+        try {
+            DB::table('syarat_ajuan_penelitian')
+            ->where('idsyarat_ajuan_penelitian', $idsyarat_ajuan_penelitian)
+            ->update([
+                'status' => $status_baru
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 500,
+                'status' => 'danger',
+                'message' => 'Gagal mengubah status syarat penelitian',
+                'data' => []
+            ], 500);
+        }
+
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'message' => 'Status syarat penelitian berhasil diubah',
+            'data' => [
+                'idsyarat_ajuan_penelitian' => $idsyarat_ajuan_penelitian,
+                'status_baru' => $status_baru
+            ]
+        ], 200);
     }
 }

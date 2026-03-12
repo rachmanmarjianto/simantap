@@ -173,10 +173,15 @@
                                     <input type="text" class="form-control" value="{{ $nama_personil }}" readonly>
                                 </div>
                             </div>
+                            @php
+                                $gelar_depan = empty($maintenance_aset->gelar_depan_penanggungjawab) ? '' : $maintenance_aset->gelar_depan_penanggungjawab . ' ';
+                                $gelar_belakang = empty($maintenance_aset->gelar_belakang_penanggungjawab) ? '' : ', ' . $maintenance_aset->gelar_belakang_penanggungjawab;
+                                $nama_penanggungjawab = $gelar_depan . $maintenance_aset->nama_penanggungjawab . $gelar_belakang;
+                            @endphp
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Penanggung Jawab Ruang</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{{ $nama_penanggungjawab }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -200,6 +205,67 @@
                                 </div>
                             </div>
 
+                            <hr>
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <h5 style="font-weight: bold;">File</h5>
+                                </div>
+                            </div>
+
+                            <form id="form_upload_file" method="POST" action="{{ route('proses_maintenance.form_upload_file_maintenance') }}" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="idmaintenance_aset" value="{{ $maintenance_aset->idmaintenance_aset }}">
+                                <div class="form-group row">
+                                    <div class="col-lg-7 col-sm-12">
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 col-form-label">Nama File:</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" name="nama_file" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5 col-sm-12">
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                {{-- <input type="file" class="custom-file-input" name="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" required>
+                                                <label class="custom-file-label">Choose file</label> --}}
+                                                <input type="file" class="form-control" name="document" required>
+                                            </div>
+                                            <div class="input-group-append" id="btn_upload_file">
+                                                <button class="btn btn-primary" onclick="exec_upload_file()">Tambahkan</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <span style="color:red">*File yang diupload akan tampil setelah proses upload selesai dan halaman direfresh</span>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered verticle-middle table-responsive-sm" id="table_file">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Nama File</th>
+                                                    <th scope="col">File</th>
+                                                    <th scope="col">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($files as $file)
+                                                    <tr id="tr_file_{{ $file->idfile_maintenance }}">
+                                                        <td>{{ $file->nama_file }}</td>
+                                                        <td><a href="{{ route('filestorage_get', ['id' => encrypt($file->idfile_maintenance)]) }}" target="_blank">Lihat File</a></td>
+                                                        <td id="td_btn_file_{{ $file->idfile_maintenance }}"><button class="btn btn-danger btn-sm" onclick="hapus_file({{ $file->idfile_maintenance }})">Hapus</button></td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
 
                             <div class="col-sm-12 mt-3" style="text-align: right;" id="div_button_submit">
                                 <button type="button" class="btn btn-danger" onclick="submit(4)">Batalkan Draft</button>
@@ -238,7 +304,7 @@
     <script>
 
         var jenis_maintenance = {{ $jenis_maintenance }};
-
+        
 
         jQuery(document).ready(function() {
             $(".summernote").summernote({
@@ -257,6 +323,61 @@
         }, window.save = function() {
             $(".click2edit").summernote("destroy")
         };
+
+        function exec_upload_file(){
+            $('#btn_upload_file').html('<button class="btn btn-primary" type="button" disabled><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...</button>');
+            
+            var form = $('#form_upload_file');
+            if(form[0].checkValidity() === false){
+                form[0].reportValidity();
+                $('#btn_upload_file').html('<button class="btn btn-primary" onclick="exec_upload_file()">Tambahkan</button>');
+                return;
+            }
+
+            $('#form_upload_file').submit();
+        }
+
+        function hapus_file(idfile){
+            var idrow = '#tr_file_' + idfile;
+            var id_btn = '#td_btn_file_' + idfile;
+            $(id_btn).html('<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div>');
+
+            Swal.fire({
+                title: "Hapus File?",
+                text: "File yang sudah dihapus tidak dapat dikembalikan lagi",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, Hapus!"
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('filestorage_hapus') }}",
+                        type: "POST",
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            idfile_maintenance: idfile
+                        },
+                        success: function(response) {
+                            $(id_btn).html('<button class="btn btn-danger btn-sm" onclick="hapus_file(' + idfile + ')">Hapus</button>');
+                            if(response.code == 200){
+                                Swal.fire("Deleted!", response.message, "success").then(() => {
+                                    $(idrow).remove();
+                                });
+                            }
+                            else{
+                                Swal.fire("Error!", response.message, "error");
+                            }
+                        },
+                        error: function(xhr) {
+                            $(id_btn).html('<button class="btn btn-danger btn-sm" onclick="hapus_file(' + idfile + ')">Hapus</button>');
+                            Swal.fire("Error!", "Terjadi kesalahan saat menghapus file.", "error");
+                        }
+                    });
+                }
+            });
+        }
 
         function submit(status){
 

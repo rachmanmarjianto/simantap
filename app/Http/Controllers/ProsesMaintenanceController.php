@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ProsesMaintenanceController extends Controller
 {
@@ -32,8 +34,10 @@ class ProsesMaintenanceController extends Controller
                                                         from maintenance_aset as ma
                                                         where (jenis_maintenance = \'3\' OR jenis_maintenance = \'4\')
                                                         group by kode_barang_aset) as q1'), 'a.kode_barang_aset', '=', 'q1.kode_barang_aset')
+                        ->leftJoin('maintenance_aset as ma', 'a.kode_barang_aset', 'ma.kode_barang_aset')
                         ->select('a.nama_barang', 'a.kode_barang_aset', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance', 'a.keterangan',
-                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang')
+                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang',
+                                DB::raw('COUNT(ma.idmaintenance_aset) as total_maintenance'))
                         ->where('pm.status', 'true')
                         ->where('pm.iduser', session('userdata')['iduser'])
                         ->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
@@ -52,8 +56,10 @@ class ProsesMaintenanceController extends Controller
                                                         from maintenance_aset as ma
                                                         where (jenis_maintenance = \'3\' OR jenis_maintenance = \'4\')
                                                         group by kode_barang_aset) as q1'), 'a.kode_barang_aset', '=', 'q1.kode_barang_aset')
+                        ->leftJoin('maintenance_aset as ma', 'a.kode_barang_aset', 'ma.kode_barang_aset')
                         ->select('a.nama_barang', 'a.kode_barang_aset', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance','a.keterangan',
-                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang')
+                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang', 
+                                DB::raw('COUNT(ma.idmaintenance_aset) as total_maintenance'))
                         ->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
                         ->where('pr.iduser', session('userdata')['iduser'])
                         ->orderBy('a.kode_barang_aset', 'asc')
@@ -71,16 +77,18 @@ class ProsesMaintenanceController extends Controller
                                                         from maintenance_aset as ma
                                                         where (jenis_maintenance = \'3\' OR jenis_maintenance = \'4\')
                                                         group by kode_barang_aset) as q1'), 'a.kode_barang_aset', '=', 'q1.kode_barang_aset')
+                        ->leftJoin('maintenance_aset as ma', 'a.kode_barang_aset', 'ma.kode_barang_aset')
                         ->select('a.nama_barang', 'a.kode_barang_aset', 'a.merk_barang', 'a.tahun_aset', 'a.jarak_maintenance','a.keterangan',
-                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang')
+                                'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan as satuan_maintenance', 'a.kondisi_barang',
+                                DB::raw('COUNT(ma.idmaintenance_aset) as total_maintenance'))
                         ->whereRaw('(a.terjadwal_maintenance = true OR a.terjadwal_kalibrasi = true)')
                         ->where('a.idunit_kerja', session('userdata')['idunit_kerja'])
                         ->orderBy('a.kode_barang_aset', 'asc')
                         ->groupBy('a.kode_barang_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'q1.last_maintenance', 'sm.satuan', 'a.keterangan')
                         ->get();
         }
-        
 
+        // dd($aset);
         
 
         $data_maintenance = [];
@@ -108,6 +116,13 @@ class ProsesMaintenanceController extends Controller
                 }
 
             }
+            else if(empty($item->last_maintenance) && $item->total_maintenance > 0){
+                $warning[$item->kode_barang_aset] = [
+                    "warna" => "warning",
+                    "pesan" => "Belum Pernah dilakukan maintenance, segera selesaikan maintenance pertama",
+                    "maintenance_pernah" => true
+                ];
+            }
             else{
                 $warning[$item->kode_barang_aset] = [
                     "warna" => "warning",
@@ -119,13 +134,17 @@ class ProsesMaintenanceController extends Controller
             
         }
 
+        // dd($warning);
+
         $pengajuan = 0;
         if(session('userdata')['idrole'] == 4){
             $pengajuan = DB::table('maintenance_aset as ma')
                         ->join('aset as a', 'ma.kode_barang_aset', 'a.kode_barang_aset')
+                        ->join('pj_ruang as pr', 'a.idruang', 'pr.idruang')
                         ->select('ma.idmaintenance_aset')
                         ->where('ma.status', '2')
                         ->where('a.idunit_kerja', session('userdata')['idunit_kerja'])
+                        ->where('pr.iduser', session('userdata')['iduser'])
                         ->groupBy('ma.idmaintenance_aset')
                         ->count();
         }
@@ -380,12 +399,15 @@ class ProsesMaintenanceController extends Controller
         $maintenance_aset = DB::table('maintenance_aset as ma')
                             ->join('user as u', 'ma.created_by', 'u.iduser')
                             ->join('aset as a', 'ma.kode_barang_aset', 'a.kode_barang_aset')
+                            ->join('pj_ruang as pr', 'a.idruang', 'pr.idruang')
+                            ->join('user as u2', 'pr.iduser', 'u2.iduser')
                             ->join('simba.ruang as r', 'a.idruang', 'r.id')
                             ->join('simba.gedung as g', 'r.id_gedung', 'g.id')
                             ->join('simba.kampus as k', 'g.id_kampus', 'k.id')
                             ->select('ma.idmaintenance_aset', 'ma.kode_barang_aset', 'ma.waktu_maintenance', 'ma.jenis_maintenance', 'ma.status', 'u.nipnik as nipnik_creator',
                                     'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'u.nipnik as nipnik_creator', 'ma.rekom_kondisi_aset', 'a.keterangan',
-                                    'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'ma.permintaan_maintenance')
+                                    'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'ma.permintaan_maintenance', 'u2.nipnik as nipnik_penanggungjawab', 
+                                    'u2.nama as nama_penanggungjawab', 'u2.gelar_depan as gelar_depan_penanggungjawab', 'u2.gelar_belakang as gelar_belakang_penanggungjawab')
                             ->where('idmaintenance_aset', $idmaintenance_aset)
                             ->first();
 
@@ -397,6 +419,16 @@ class ProsesMaintenanceController extends Controller
                         ->where('ima.idmaintenance_aset', $idmaintenance_aset)
                         ->orderBy('it.urutan', 'asc')
                         ->get();
+
+        $diajukan_oleh = DB::table('log_status_maintenance_aset as lsma')
+                        ->join('user as u', 'lsma.updated_by', 'u.iduser')
+                        ->select('u.nipnik', 'u.nama', 'u.gelar_depan', 'u.gelar_belakang')
+                        ->where('lsma.idmaintenance_aset', $idmaintenance_aset)
+                        ->where('lsma.status', 2)
+                        ->orderBy('lsma.timestamp', 'desc')
+                        ->first();
+
+        // dd($diajukan_oleh);
 
         $layout = array();
 
@@ -442,17 +474,23 @@ class ProsesMaintenanceController extends Controller
                         ->where('lsma.idmaintenance_aset', $idmaintenance_aset)
                         ->orderBy('lsma.idlog_status_maintenance_aset', 'asc')
                         ->get();
+
+        $files = DB::table('file_maintenance')
+                    ->where('idmaintenance_aset', $idmaintenance_aset)
+                    ->get();
         
         // dd(session('userdata'));
+        // dd($maintenance_aset);
+        // dd($diajukan_oleh);
 
         if($maintenance_aset->status == 1 && $maintenance_aset->nipnik_creator == session('userdata')['nipnik']){          
-            return view('proses_maintenance.form_edit_proses', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status'));
+            return view('proses_maintenance.form_edit_proses', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status', 'files', 'diajukan_oleh'));
         }
         else if($maintenance_aset->status == 1 && $maintenance_aset->nipnik_creator != session('userdata')['nipnik']){
-            return view('proses_maintenance.form_edit_view', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status'));
+            return view('proses_maintenance.form_edit_view', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status', 'files', 'diajukan_oleh'));
         }
         else{
-            return view('proses_maintenance.form_edit_view', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status'));
+            return view('proses_maintenance.form_edit_view', compact('menu', 'submenu', 'layout', 'jenis_maintenance', 'maintenance_aset', 'log_status', 'files', 'diajukan_oleh'));
         }
 
         
@@ -704,6 +742,13 @@ class ProsesMaintenanceController extends Controller
 
             $tlast = Carbon::parse($last_maintenance->last_maintenance);
             $jarak_hari_dari_last_maintenance = intval($tlast->diffInDays($tnow));
+
+            $idpj_ruang = DB::table('pj_ruang')
+                            ->join('aset as a', 'pj_ruang.idruang', 'a.idruang')
+                            ->select('pj_ruang.idpj_ruang')
+                            ->where('a.kode_barang_aset', $req->kode_barang_aset)
+                            ->where('pj_ruang.iduser', session('userdata')['iduser'])
+                            ->first();
         }
 
         $return = 0;
@@ -712,6 +757,7 @@ class ProsesMaintenanceController extends Controller
             DB::beginTransaction(); 
 
             if($req->status != 3){
+                // dd('hallo');
                 DB::table('maintenance_aset')
                     ->where('idmaintenance_aset', $req->idmaintenance_aset)
                     ->update([
@@ -726,7 +772,7 @@ class ProsesMaintenanceController extends Controller
                     ->where('idmaintenance_aset', $req->idmaintenance_aset)
                     ->update([
                         'status' => $req->status,
-                        'verified_by' => session('userdata')['iduser'],
+                        'verified_by' => $idpj_ruang->idpj_ruang,
                         'verified_at' => $ts,
                         'ketepatan_jadwal_hari' => $jarak_hari_dari_last_maintenance,
                         'rekom_kondisi_aset' => $req->rekom_kondisi_aset,
@@ -780,11 +826,28 @@ class ProsesMaintenanceController extends Controller
             }           
         }
         else{
-            return back()->with('status', [
-                'code' => 500,
-                'status' => 'danger',
-                'message' => 'Gagal membatalkan ajuan',
-            ]);
+            if($req->status == 1){
+                return back()->with('status', [
+                    'code' => 500,
+                    'status' => 'danger',
+                    'message' => 'Gagal membatalkan ajuan',
+                ]);
+            }
+            else if($req->status == 3){
+                return back()->with('status', [
+                    'code' => 500,
+                    'status' => 'danger',
+                    'message' => 'Gagal memverifikasi ajuan',
+                ]);
+            }
+            else if($req->status == 4){
+                return back()->with('status', [
+                    'code' => 500,
+                    'status' => 'danger',
+                    'message' => 'Gagal membatalkan draft',
+                ]);
+            }
+            
         }
     }
 
@@ -837,5 +900,93 @@ class ProsesMaintenanceController extends Controller
             'message' => 'success',
             'data' => $pengajuan
         ], 200);
+    }
+
+    public function form_upload_file_maintenance(Request $request){
+        // dd($request->all());
+
+        $rules = [
+            'idmaintenance_aset' => 'required|integer',
+            'nama_file'          => 'required|string',
+            'document'           => 'required|mimes:pdf|max:5120',
+        ];
+
+        $messages = [
+            'idmaintenance_aset.required' => 'ID Aset wajib diisi.',
+            'nama_file.required'          => 'Nama file tidak boleh kosong.',
+            'document.mimes'             => 'File harus berformat PDF.',
+            'document.max'               => 'Ukuran file maksimal adalah 5MB.',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            $allErrors = implode('<br>', $validator->errors()->all());
+
+            return back()
+                ->withErrors($validator) // Mengirim pesan error asli
+                ->withInput()           // Agar input user tidak hilang
+                ->with('status', [      // Custom report Anda
+                    'code' => 422,
+                    'status' => 'danger',
+                    'message' => 'Validasi gagal: ' . $allErrors
+                ]);
+        }
+
+        if($request->hasFile('document')){
+            $file = $request->file('document');
+            
+            date_default_timezone_set('Asia/Jakarta');
+            $ts = date('Y-m-d H:i:s');
+            $today = date('Y-m-d');
+
+            //ubah nama jadi uuid untuk menghindari duplikasi nama file
+            $filename = \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+            //cek apakah directory sudah ada atau belum
+            if(!Storage::disk('local')->exists('private/upload/'.$today)){
+                if(!Storage::disk('local')->makeDirectory('private/upload/' . $today)){
+                    return back()->with('status', [
+                        'code' => 500,
+                        'status' => 'danger',
+                        'message' => 'Gagal membuat direktori penyimpanan'
+                    ]);
+                }
+            }
+
+            $filePath = 'private/upload/'.$today.'/' . $filename;
+            
+
+            try {
+                Storage::disk('local')->put($filePath, file_get_contents($file));
+
+                DB::table('file_maintenance')->insert([
+                    'idmaintenance_aset' => $request->idmaintenance_aset,
+                    'nama_file' => $request->nama_file,
+                    'file_path' => $filePath,
+                    'created_by' => session('userdata')['iduser'],
+                    'created_at' => $ts
+                ]);
+            } catch (\Exception $e) {
+                return back()->with('status', [
+                    'code' => 500,
+                    'status' => 'danger',
+                    'message' => 'Gagal menyimpan data file maintenance'
+                ]);
+            }
+
+            return back()->with('status', [
+                'code' => 200,
+                'status' => 'success',
+                'message' => 'File berhasil diunggah'
+            ]);
+        }
+        else{
+            return back()->with('status', [
+                'code' => 500,
+                'status' => 'danger',
+                'message' => 'proses unggah gagal'
+            ]);
+        }
     }
 }

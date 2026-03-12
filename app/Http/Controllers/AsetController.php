@@ -93,7 +93,7 @@ class AsetController extends Controller
 					})
 					->where('a.idunit_kerja', $idunitkerja)
 					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 
-							'a.kondisi_barang', 'a.keterangan',
+							'a.kondisi_barang', 'a.keterangan', 'a.public', 'a.status',
 							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
 					->get();
 		}
@@ -107,7 +107,8 @@ class AsetController extends Controller
 							->where('km.status', '=', true);
 					})
 					->where('a.idunit_kerja', $idunitkerja)
-					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang', 'a.keterangan',
+					->select('a.kode_barang_aset', 'a.nama_barang', 'a.merk_barang', 'a.tahun_aset', 'r.nama_ruang', 
+							'g.nama_gedung', 'k.nama_kampus', 'a.kondisi_barang', 'a.keterangan', 'a.public', 'a.status',
 							DB::raw('COALESCE(km.kapasitas_max, 0) as kapasitas_max'))
 					->get();
 
@@ -207,7 +208,7 @@ class AsetController extends Controller
 					->join('simba.barang as b', 'brd.id_barang', '=', 'b.id')
 					->join('simba.ruang as r', 'brd.id_ruang', '=', 'r.id')
 					->where('brd.kode_barang', $kode_barang)
-					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.id as idruang', 'brd.id_unit_kerja', 'brd.status_barang')
+					->select('brd.kode_barang', 'b.nama_barang', 'brd.merk_barang', 'brd.tahun_aset', 'r.id as idruang', 'brd.id_unit_kerja', 'brd.status_barang', 'brd.id_barang')
 					->first();
 
 		if(!$aset) {
@@ -226,6 +227,7 @@ class AsetController extends Controller
 			'idruang' => $aset->idruang,
 			'created_at' => $ts,
 			'idunit_kerja' => $aset->id_unit_kerja,
+			'idbarang' => $aset->id_barang,
 			'kondisi_barang' => $aset->status_barang,
 		);
 
@@ -448,6 +450,63 @@ class AsetController extends Controller
 			]);
 
 		return back();
+		
+	}
+
+	function publish_aset(Request $req){
+		// dd($req->all());
+		$kode_barang_aset = $req->kodeaset;
+		$public = $req->status;
+
+		if($public == 1)
+			$public = 't';
+		else			
+			$public = 'f';
+
+		try {
+			DB::table('aset')
+				->where('kode_barang_aset', $kode_barang_aset)
+				->update(['public' => $public]);
+			return response()->json([
+				'code' => 200,
+				'status' => 'success',
+				'message' => 'Status publikasi aset berhasil diperbarui'
+			], 200);
+		} catch (\Exception $e) {
+			return response()->json([
+				'code' => 500,
+				'status' => 'error',
+				'message' => 'Gagal memperbarui status publikasi aset: ' . $e->getMessage()
+			], 500);
+		}
+		
+	}
+
+	function ubah_status(Request $req){
+		$kode_barang_aset = $req->kodeaset;
+		$status = $req->status;
+
+		if($status == 1)
+			$status = 't';
+		else			
+			$status = 'f';
+
+		try {
+			DB::table('aset')
+				->where('kode_barang_aset', $kode_barang_aset)
+				->update(['status' => $status]);
+			return response()->json([
+				'code' => 200,
+				'status' => 'success',
+				'message' => 'Status aset berhasil diperbarui'
+			], 200);
+		} catch (\Exception $e) {
+			return response()->json([
+				'code' => 500,
+				'status' => 'error',
+				'message' => 'Gagal memperbarui status aset: ' . $e->getMessage()
+			], 500);
+		}
 		
 	}
 

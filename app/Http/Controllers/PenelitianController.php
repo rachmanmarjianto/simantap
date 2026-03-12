@@ -11,5 +11,8 @@ use Illuminate\Support\Facades\Crypt;
 
 class PenelitianController extends Controller
 {
-
+    public function index()
+    {
+        return view('penelitian.index');
+    }
 }

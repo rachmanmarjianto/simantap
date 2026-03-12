@@ -21,8 +21,17 @@
 						<div class="row no-gutters">
 							<div class="col-xl-12">
 								<div class="auth-form">
+									<!-- Cybercampus SSO Header - UNAIR as Primary Owner -->
+									<div align="center" style="margin-bottom: 40px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+										<img src="{{ asset('app-assets') }}/images/unair/unair.png" alt="UNAIR Logo" style="height: 80px; width: auto;">
+										<div style="text-align: left;">
+											<div style="font-size: 12px; font-weight: 600; color: #666; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 2px;">Universitas Airlangga</div>
+											<div style="font-size: 18px; font-weight: 800; color: #004685; letter-spacing: 0.3px;">Cybercampus SSO</div>
+										</div>
+									</div>
+
 									{{-- <div align="center"><img src="{{ asset('app-assets') }}/images/logo_unair.jpeg" alt="logo" class="mb-4" width="150"></div> --}}
-									<div align="center"><img src="{{ asset('app-assets') }}/images/unair/logo_simantab_panjang.jpg" alt="logo" class="mb-4" width="100%"></div>
+									<div align="center"><img src="{{ asset('app-assets') }}/images/unair/logo_simantab_panjang.jpg" alt="logo" class="mb-4" style="width: 85%; max-width: 350px;"></div>
 									{{-- <h2 class="text-center mb-4">SIM Alat</h2> --}}
 									<form action = "{{ route('login_masuk') }}" method="POST">
 										@csrf

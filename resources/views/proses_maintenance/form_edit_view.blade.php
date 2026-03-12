@@ -119,7 +119,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Tanggal {{ $jenis_maintenance == 1 ? 'Kalibrasi' : 'Maintenance' }}</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{{ (empty($maintenance_aset->waktu_maintenance) || is_null($maintenance_aset->waktu_maintenance)) ? '{ Terisi otomatis }' : $maintenance_aset->waktu_maintenance }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -193,18 +193,27 @@
                             @endforeach
                                 
                             @php
-                                if(empty(session('userdata')['gelar_depan']) || is_null(session('userdata')['gelar_depan']) || session('userdata')['gelar_depan'] == '') {
-                                    $gelar_depan = '';
-                                } else {
-                                    $gelar_depan = session('userdata')['gelar_depan'] . ' ';
+                                if(empty($diajukan_oleh) || is_null($diajukan_oleh)) {
+                                    if(empty(session('userdata')['gelar_depan']) || is_null(session('userdata')['gelar_depan']) || session('userdata')['gelar_depan'] == '') {
+                                        $gelar_depan = '';
+                                    } else {
+                                        $gelar_depan = session('userdata')['gelar_depan'] . ' ';
+                                    }
+
+                                    if(empty(session('userdata')['gelar_belakang']) || is_null(session('userdata')['gelar_belakang']) || session('userdata')['gelar_belakang'] == '') {
+                                        $gelar_belakang = '';
+                                    } else {
+                                        $gelar_belakang = ', ' . session('userdata')['gelar_belakang'];
+                                    }
+                                    $nama_personil = $gelar_depan . session('userdata')['nama'] . $gelar_belakang;
+                                }
+                                else{
+                                    $gelar_depan = empty($diajukan_oleh->gelar_depan) ? '' : $diajukan_oleh->gelar_depan . ' ';
+                                    $gelar_belakang = empty($diajukan_oleh->gelar_belakang) ? '' : ', ' . $diajukan_oleh->gelar_belakang;
+                                    $nama_personil = $gelar_depan . $diajukan_oleh->nama . $gelar_belakang;
                                 }
 
-                                if(empty(session('userdata')['gelar_belakang']) || is_null(session('userdata')['gelar_belakang']) || session('userdata')['gelar_belakang'] == '') {
-                                    $gelar_belakang = '';
-                                } else {
-                                    $gelar_belakang = ', ' . session('userdata')['gelar_belakang'];
-                                }
-                                $nama_personil = $gelar_depan . session('userdata')['nama'] . $gelar_belakang;
+                                
                             @endphp
                             
                             <div class="form-group row">
@@ -213,10 +222,15 @@
                                     <input type="text" class="form-control" value="{{ $nama_personil }}" readonly>
                                 </div>
                             </div>
+                            @php
+                                $gelar_depan = empty($maintenance_aset->gelar_depan_penanggungjawab) ? '' : $maintenance_aset->gelar_depan_penanggungjawab . ' ';
+                                $gelar_belakang = empty($maintenance_aset->gelar_belakang_penanggungjawab) ? '' : ', ' . $maintenance_aset->gelar_belakang_penanggungjawab;
+                                $nama_penanggungjawab = $gelar_depan . $maintenance_aset->nama_penanggungjawab . $gelar_belakang;
+                            @endphp
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Penanggung Jawab Ruang</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" value="{ Terisi otomatis }" readonly>
+                                    <input type="text" class="form-control" value="{{ $nama_penanggungjawab }}" readonly>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -239,6 +253,39 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <hr>
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <h5 style="font-weight: bold;">File</h5>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <span style="color:red">*File yang diupload akan tampil setelah proses upload selesai dan halaman direfresh</span>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered verticle-middle table-responsive-sm" id="table_file">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Nama File</th>
+                                                    <th scope="col">File</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($files as $file)
+                                                    <tr id="tr_file_{{ $file->idfile_maintenance }}">
+                                                        <td>{{ $file->nama_file }}</td>
+                                                        <td><a href="{{ route('filestorage_get', ['id' => encrypt($file->idfile_maintenance)]) }}" target="_blank">Lihat File</a></td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
                             
 
 
@@ -324,6 +371,9 @@
                                 </tbody>
                             </table>
                         </div>
+
+
+
                     </div>
                 </div>
             </div>

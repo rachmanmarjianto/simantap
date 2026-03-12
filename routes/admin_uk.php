@@ -34,5 +34,5 @@ Route::middleware(['akses:2,3,4'])->group(function () {
     Route::post('/proses-maintenance/form_submit_maintenance_proses', [ProsesMaintenanceController::class, 'submit_form_proses_maintenance'])->name('form_submit_maintenance_proses');
     Route::post('/proses-maintenance/form_batal_ajuan', [ProsesMaintenanceController::class, 'form_batal_ajuan'])->name('form_batal_ajuan');
     Route::post('/proses-maintenance/get_pengajuan_verifikasi', [ProsesMaintenanceController::class, 'get_pengajuan_verifikasi'])->name('prosesmaintenance_get_pengajuan_verifikasi');
-
+    Route::post('/proses-maintenance/form_upload_file_maintenance', [ProsesMaintenanceController::class, 'form_upload_file_maintenance'])->name('proses_maintenance.form_upload_file_maintenance');
 });

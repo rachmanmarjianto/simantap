@@ -108,7 +108,11 @@
 		<!--**********************************
 			Sidebar start
 		***********************************-->
-    @include('menu_kiri')
+		@if(in_array(session('userdata')['idrole'], [6]))
+			@include('menu_mahasiswa')
+		@else
+    		@include('menu_kiri')
+		@endif
 		<!--**********************************
 			Sidebar end
 		***********************************-->

@@ -73,7 +73,8 @@
 							<li @if($submenu == 'layanan_aset') class="mm-active" @endif><a @if($submenu == 'layanan_aset') class="mm-active" @endif href="{{ route('layanan_aset_index') }}">Layanan-Alat</a></li>
 							@endif
 							<li @if($submenu == 'maintenance_alat') class="mm-active" @endif><a @if($submenu == 'maintenance_alat') class="mm-active" @endif href="{{ route('maintenance_alat_index') }}">Maintenance Alat</a></li>
-							<li @if($submenu == 'form_maintenance') class="mm-active" @endif><a @if($submenu == 'form_maintenance') class="mm-active" @endif href="{{ route('form_maintenance_index') }}">Form Maintenance</a></li>							
+							{{-- <li @if($submenu == 'penelitian_master') class="mm-active" @endif><a @if($submenu == 'penelitian') class="mm-active" @endif href="{{ route('penelitian_master_index') }}">Penelitian</a></li> --}}
+							<li @if($submenu == 'form_maintenance') class="mm-active" @endif><a @if($submenu == 'form_maintenance') class="mm-active" @endif href="{{ route('form_maintenance_index') }}">Form</a></li>							
 							<li @if($submenu == 'api_aplikasi') class="mm-active" @endif><a @if($submenu == 'api_aplikasi') class="mm-active" @endif href="{{ route('api_aplikasi_index') }}">API Aplikasi</a></li>
 							{{-- <li><a href="{{ route('unit_kerja_index') }}">Unit Kerja</a></li>
 							<li><a href="{{ route('ruang_index') }}">Ruang</a></li>
@@ -120,7 +121,7 @@
 								<span class="nav-text">Penelitian</span>
 							</a>
 							<ul aria-expanded="false" @if($menu == 'penelitian') class="mm-collapse mm-show" @endif>
-								<li @if($submenu == 'sub_penelitian') class="mm-active" @endif><a @if($submenu == 'sub_penelitian') class="mm-active" @endif href="{{ route('penelitian_index') }}">Penelitian</a></li>
+								<li @if($submenu == 'sub_penelitian') class="mm-active" @endif><a @if($submenu == 'sub_penelitian') class="mm-active" @endif href="{{ route('penelitian_admin_index') }}">Penelitian</a></li>
 															
 							</ul>
 						</li>
