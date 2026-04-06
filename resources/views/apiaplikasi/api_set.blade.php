@@ -48,12 +48,12 @@
 								</div>
 							</div>
 							<div class="card-body">
-								<a type="button" class="btn btn-success" href="{{ route('api_aplikasi_tambah_aplikasi', ['id'=>encrypt($idunitkerja)]) }}"><i class="fa fa-plus" aria-hidden="true"></i> Aplikasi Baru</a>
+								<a type="button" class="btn btn-success" href="{{ route('api_aplikasi_tambah_aplikasi', ['id'=>encrypt($idunitkerja)]) }}"><i class="fa fa-plus" aria-hidden="true"></i> Apliksai Baru</a>
 								<div class="table table-striped table-responsive-sm">
 									<table id="example3" class="display" style="width:100%">
 										<thead>
 											<tr>
-												<th>Nama Aplikasi</th>
+												<th>Nama Endpoint</th>
 												<th>IP Address</th>
 												<th>Status</th>
 												<th>Aksi</th>

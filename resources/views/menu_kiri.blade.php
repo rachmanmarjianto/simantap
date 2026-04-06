@@ -134,7 +134,7 @@
 								<span class="nav-text">Praktikum</span>
 							</a>
 							<ul aria-expanded="false" @if($menu == 'praktikum') class="mm-collapse mm-show" @endif>
-								<li @if($submenu == 'sub_praktikum') class="mm-active" @endif><a @if($submenu == 'sub_praktikum') class="mm-active" @endif href="{{ route('praktikum_index') }}">Praktikum</a></li>
+								<li @if($submenu == 'sub_praktikum') class="mm-active" @endif><a @if($submenu == 'sub_praktikum') class="mm-active" @endif href="{{ route('praktikum_admin_index') }}">Praktikum</a></li>
 															
 							</ul>
 						</li>

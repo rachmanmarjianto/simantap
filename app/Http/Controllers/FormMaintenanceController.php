@@ -31,19 +31,21 @@ class FormMaintenanceController extends Controller
         } else {
             $unitkerja = DB::table(DB::raw('(SELECT idunit_kerja FROM role_user GROUP BY idunit_kerja) as q1'))
                             ->join('aucc.unit_kerja as uk', 'q1.idunit_kerja', '=', 'uk.id_unit_kerja')
-                            ->leftJoin('template_maintenance as tm', 'q1.idunit_kerja', '=', 'tm.idunit_kerja')
+                            ->leftJoin('template_maintenance as tm', function ($join) {
+                                $join->on('q1.idunit_kerja', '=', 'tm.idunit_kerja')
+                                    ->where('tm.status', true);
+                            })
                             ->select('q1.idunit_kerja', 'uk.nm_unit_kerja', 
                                         DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'1\' THEN 1 ELSE NULL END), 0) as jumlah_form_kalibrasi'),
                                         DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'2\' THEN 1 ELSE NULL END), 0) as jumlah_form_maintenance'),
                                         DB::raw('COALESCE(SUM(CASE WHEN tm.jenis_maintenance = \'3\' THEN 1 ELSE NULL END), 0) as jumlah_form_penelitian'))
                             ->where('q1.idunit_kerja', session('userdata')['idunit_kerja'])
-                            ->where('tm.status', true)
                             ->groupBy('q1.idunit_kerja', 'uk.nm_unit_kerja')
                             ->orderBy('uk.nm_unit_kerja', 'asc')
                             ->get();
         }
 
-        // dd($unitkerja);
+        // dd(session('userdata'));
 
         return view('form_maintenance.index', compact('menu', 'submenu', 'unitkerja'));
     }
@@ -93,7 +95,8 @@ class FormMaintenanceController extends Controller
 
         $unitkerja = DB::table('aucc.unit_kerja as uk')
                         ->leftJoin('template_maintenance as tm', 'uk.id_unit_kerja', '=', 'tm.idunit_kerja')
-                        ->select('uk.nm_unit_kerja', 'uk.id_unit_kerja', 'tm.nama_template', 'tm.jenis_maintenance', 'tm.status', 'tm.idtemplate_maintenance')
+                        ->select('uk.nm_unit_kerja', 'uk.id_unit_kerja', 'tm.nama_template', 'tm.jenis_maintenance', 'tm.status', 'tm.idtemplate_maintenance', 
+                                    'tm.internal')
                         ->where('uk.id_unit_kerja', $idunit_kerja)
                         ->get();
 
@@ -120,10 +123,18 @@ class FormMaintenanceController extends Controller
     {
         // dd($request->all());
         // dd(session('userdata'));
+        $validated = $request->validate([
+            'idunit_kerja' => 'required|integer',
+            'nama_template' => 'required|string|max:255',
+            'jenis_maintenance' => 'required|integer',
+            'pelaksana_pengaju' => 'required|string'
+        ]);
+        // Laravel will automatically redirect back with validation errors for each field
 
         $idunit_kerja = $request->input('idunit_kerja');
         $nama_template = $request->input('nama_template');
         $jenis_maintenance = $request->input('jenis_maintenance');
+        $pelaksana_pengaju = $request->input('pelaksana_pengaju');
 
         $now = Carbon::now('Asia/Jakarta');
         $ts = $now->format('Y-m-d H:i:s');
@@ -132,6 +143,7 @@ class FormMaintenanceController extends Controller
             'idunit_kerja' => $idunit_kerja,
             'nama_template' => $nama_template,
             'jenis_maintenance' => $jenis_maintenance,
+            'internal' => $pelaksana_pengaju,
             'status' => '1',
             'created_at' => $ts,
             'created_by' => session('userdata')['iduser']
@@ -227,7 +239,7 @@ class FormMaintenanceController extends Controller
         $idform = decrypt($idform);
 
         $template = DB::table('template_maintenance as tm')
-                        ->select('tm.idtemplate_maintenance', 'tm.idunit_kerja', 'tm.nama_template', 'tm.jenis_maintenance', 'tm.status')
+                        ->select('tm.idtemplate_maintenance', 'tm.idunit_kerja', 'tm.nama_template', 'tm.jenis_maintenance', 'tm.status', 'tm.internal')
                         ->where('tm.idtemplate_maintenance', $idform)
                         ->get();
 

@@ -123,7 +123,7 @@ class PermintaanLayananController extends Controller
 						->where('e.idjenis_endpoint', 2)
 						->where('e.status', 1)
 						->where('au.status', 1)
-						->select('e.link')
+						->select('e.link', 'e.id_auth_type', 'e.idendpoint')
 						->first();
 
 		// dd($tgl_awal, $tgl_akhir, $endpoint);
@@ -137,21 +137,51 @@ class PermintaanLayananController extends Controller
 			return redirect()->back();
 		}
 
+		if($endpoint->id_auth_type == 1) {
+			$nilai_komponen = DB::table('nilai_komponen_auth')
+							->where('idendpoint', $endpoint->idendpoint)
+							->get();
+
+			$token = base64_encode($nilai_komponen[0]->nilai.':'.$nilai_komponen[1]->nilai);
+		}
+		else{
+			$token = null;
+		}
+
 
 		try {
 			$curl = curl_init();
 
-			curl_setopt_array($curl, array(
-				CURLOPT_URL => $endpoint->link,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => '',
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 0,
-				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => 'POST',
-				CURLOPT_POSTFIELDS => array('awal' => $tgl_awal, 'akhir' => $tgl_akhir),
-			));
+			if($endpoint->id_auth_type == 0) {
+				curl_setopt_array($curl, array(
+					CURLOPT_URL => $endpoint->link,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_ENCODING => '',
+					CURLOPT_MAXREDIRS => 10,
+					CURLOPT_TIMEOUT => 0,
+					CURLOPT_FOLLOWLOCATION => true,
+					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					CURLOPT_CUSTOMREQUEST => 'POST',
+					CURLOPT_POSTFIELDS => array('awal' => $tgl_awal, 'akhir' => $tgl_akhir),
+				));
+			}
+			//untuk sementara hanya ada basic auth, jadi kalo auth type nya 1 (basic auth) baru dikasih header authorization, kalo ndak ya gausah, siapa tau nanti ada jenis auth lain yang butuh token tapi formatnya beda, jd ndak bisa langsung diambil dari db kaya basic auth
+			else{
+				curl_setopt_array($curl, array(
+					CURLOPT_URL => $endpoint->link,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_ENCODING => '',
+					CURLOPT_MAXREDIRS => 10,
+					CURLOPT_TIMEOUT => 0,
+					CURLOPT_FOLLOWLOCATION => true,
+					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					CURLOPT_CUSTOMREQUEST => 'POST',
+					CURLOPT_POSTFIELDS => array('awal' => $tgl_awal, 'akhir' => $tgl_akhir),
+					CURLOPT_HTTPHEADER => array(
+						'Authorization: Basic '.$token
+					),
+				));
+			}
 
 			$response = curl_exec($curl);
 

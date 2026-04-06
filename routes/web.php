@@ -27,6 +27,13 @@ Route::get('/', [HomeController::class, 'halamanpublik'])->name('publik_home');
 Route::get('/publik/login', [LoginController::class, 'publik_login'])->name('publik_login');
 Route::get('/publik/register', [LoginController::class, 'publik_register'])->name('publik_register');
 
+Route::get('/reload-captcha', function () {
+    return response()->json([
+        'url' => captcha_src(6) . '&_=' . time(),
+    ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+      ->header('Pragma', 'no-cache');
+})->name('captcha.refresh');
+
 
 
 Route::get('/login/', [LoginController::class, 'index'])->name('login');

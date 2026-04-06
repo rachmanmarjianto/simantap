@@ -77,7 +77,7 @@
                             
                         </div>
                         <div class="card-body">
-                            <h2 style="text-align: center">FORM PELAKSANAAN {{ $template[0]->jenis_maintenance == 3 ? 'PENELITIAN' : 'PRAKTIKUM' }}</h2>
+                            <h2 style="text-align: center">FORM PELAKSANAAN {{ $template[0]->jenis_maintenance == 3 ? 'PENELITIAN' : 'PRAKTIKUM' }} {{ $template[0]->internal == 1 ? 'INTERNAL' : 'EKSTERNAL' }}</h2>
                             <div class="form-group row">
                                 <label class="col-sm-2 col-form-label">Topik Penelitian</label>
                                 <div class="col-sm-9">
@@ -97,7 +97,7 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tanggal Mulai</label>
+                                <label class="col-sm-2 col-form-label">Ruangan</label>
                                 <div class="col-sm-9">
                                     <input type="text" class="form-control" value="{ Wajib }" readonly>
                                 </div>
@@ -105,19 +105,14 @@
                                     3
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-2 col-form-label">Tanggal Akhir</label>
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" value="{ Wajib }" readonly>
-                                </div>
-                                <div class="col-sm-1">
-                                    4
-                                </div>
-                            </div>
 
                             <form action="{{ route('form_maintenance.edit.simpan_nilai_default') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="idtemplate_maintenance" value="{{ $template[0]->idtemplate_maintenance }}">
+
+                                @php
+                                    $flag = 0;
+                                @endphp
 
                                 @foreach($layout as $el)
                                     @if($el['jenis_isi'] == 1)
@@ -133,6 +128,9 @@
                                         
 
                                         @if(count($el['children']) > 0)
+                                            @php
+                                                $flag = 1;
+                                            @endphp
                                             @foreach($el['children'] as $child)
                                                 @if($child['jenis_isi'] == 2)
                                                     <div class="form-group row">
@@ -173,12 +171,14 @@
                                         {{-- </div> --}}
                                     @endif
                                 @endforeach
+                                @if($flag > 0)
                                 <div class="form-group row" >
                                     <div class="col-sm-11" style="text-align:right">
                                         <button type="submit" class="btn btn-success" style="float:right">Simpan Nilai Default</button>
                                     </div>
                                     <div class="col-sm-1"></div>
                                 </div>
+                                @endif
                             </form>
 
                             <div class="form-group col-md-12" style="padding-left:0px; padding-right:0px">
@@ -373,16 +373,6 @@
                                 <input type="text" class="form-control" name="urutan" id="mdl_urutan_element" readonly>
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Jenis Element </label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="mdl_sel_jenis_element" name="jenis_element" onchange="mld_ubahjeniselemen(this.value)">
-                                    <option value="1">Judul Topic</option>
-                                    <option value="2">Input Field</option>
-                                    <option value="3">Text Editor</option>
-                                </select>
-                            </div>                        
-                        </div>
 
                         <div class="form-group row" >
                             <label class="col-sm-2 col-form-label">Level</label>
@@ -393,6 +383,17 @@
                                     @endfor
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">Jenis Element </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="mdl_sel_jenis_element" name="jenis_element" onchange="mld_ubahjeniselemen(this.value)">
+                                    <option value="1">Judul Topic</option>
+                                    <option value="2">Input Field</option>
+                                    <option value="3">Text Editor</option>
+                                </select>
+                            </div>                        
                         </div>
 
                         <div id="mdl_parent">
@@ -493,7 +494,7 @@
 
     <script>
 
-        var jumlah_elemen = {{ count($isitemplate) + 4 }};
+        var jumlah_elemen = {{ count($isitemplate) + 3 }};
 
         jQuery(document).ready(function() {
             $(".summernote").summernote({

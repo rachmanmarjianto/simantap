@@ -57,6 +57,7 @@
                                             <th>id</th>
                                             <th>Nama Template</th>
                                             <th>Jenis Maintenance</th>
+                                            <th>Internal/Eksternal</th>
                                             <th>Status</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -75,6 +76,7 @@
                                                     <td>{{ $temp->idtemplate_maintenance }}</td>
                                                     <td>{{ $temp->nama_template }}</td>
                                                     <td>{{ $jenis }}</td>
+                                                    <td>{{ $temp->internal == 1 ? 'Internal' : 'Eksternal' }}</td>
                                                     <td id="status_{{ $temp->idtemplate_maintenance }}">
                                                         @if($temp->status == 1)
                                                             <span class="badge badge-success" style="cursor:pointer" onclick="gantistatus({{ $temp->idtemplate_maintenance }}, 0)">Aktif</span>

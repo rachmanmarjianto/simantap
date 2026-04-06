@@ -33,7 +33,7 @@
 									{{-- <div align="center"><img src="{{ asset('app-assets') }}/images/logo_unair.jpeg" alt="logo" class="mb-4" width="150"></div> --}}
 									<div align="center"><img src="{{ asset('app-assets') }}/images/unair/logo_simantab_panjang.jpg" alt="logo" class="mb-4" style="width: 85%; max-width: 350px;"></div>
 									{{-- <h2 class="text-center mb-4">SIM Alat</h2> --}}
-									<form action = "{{ route('login_masuk') }}" method="POST">
+									<form action = "{{ route('login_masuk') }}" method="POST" id="form-login">
 										@csrf
 										<div class="form-group">
 											<label><strong>Username</strong></label>
@@ -43,8 +43,17 @@
 											<label><strong>Password</strong></label>
 											<input type="password" class="form-control" name = "password">
 										</div>
-										<div class="text-center">
-											<button type="submit" class="btn btn-primary btn-block">Sign in</button>
+										<div class="form-group mb-3">
+											<label for="captcha">CAPTCHA</label>
+											<img src="{{ captcha_src(6) }}" alt="CAPTCHA" style="border: 1px solid #ccc;" id="captcha-image">
+											<span style="font-size: 12px; color:red; padding-left:10px; cursor:pointer" onclick="reloadCaptcha()">klik saya jika Captcha terlalu sulit</span>
+											<div class="input-wrapper" style="margin-top: 10px">
+												<input class="form-control" type="text" name="captcha" id="captcha" required placeholder="Masukkan CAPTCHA">
+											</div>
+											
+										</div>
+										<div class="text-center" id="button-login">
+											<button type="button" class="btn btn-primary btn-block" onclick="submitform()">Sign in</button>
 										</div>
 									</form>
 								</div>
@@ -71,6 +80,33 @@
 	<script src="{{ asset('app-assets') }}/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 	<script src="{{ asset('app-assets') }}/js/custom.min.js"></script>
 	<script src="{{ asset('app-assets') }}/js/deznav-init.js"></script>
+
+	<script>
+		function reloadCaptcha(){
+            console.log('reload');
+            $.ajax({
+                type: 'GET',
+                url: '/reload-captcha',
+                success: function(data) {
+                    $('#captcha-image').attr('src', data.url);
+        // console.log(data);
+                }
+            });
+        }
+
+		function submitform(){
+			var form = document.getElementById('form-login');
+            if (!form.checkValidity()) {
+                form.reportValidity(); // munculkan pesan required
+                return; // STOP submit
+            }
+
+			$('#button-login').html('<button type="button" class="btn btn-primary btn-block" disabled>Memproses...</button>'); // ubah tombol dengan versi disabled
+
+            
+            form.submit();
+		}
+	</script>
 
 </body>
 

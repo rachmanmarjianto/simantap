@@ -48,7 +48,7 @@
                             
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('form_maintenance_simpan_form_baru') }}" method="POST">
+                            <form action="{{ route('form_maintenance_simpan_form_baru') }}" method="POST" id="form-tambah-form-baru">
                                 @csrf
                                 <input type="hidden" name="idunit_kerja" value="{{ $idunit_kerja }}">
                                 <div class="form-group">
@@ -60,10 +60,20 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
+                                    <label for="pelaksana_pengaju">Pelaksana / Pengaju</label>
+                                    <select class="form-control" id="pelaksana_pengaju" name="pelaksana_pengaju" required>
+                                        <option value="true">Internal</option>
+                                        <option value="false">Eksternal</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
                                     <label for="nama_template">Nama Template</label>
                                     <input type="text" class="form-control" id="nama_template" name="nama_template" required>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Simpan Nama Template dan Lanjut Edit</button>
+                                <div id="btn-submit">
+                                    <button type="button" class="btn btn-primary" onclick="submitForm()">Simpan Nama Template dan Lanjut Edit</button>
+                                </div>
                             </form>
                         </div>
                         
@@ -78,7 +88,16 @@
 @section('javascript')
 
     <script>
-        
+        function submitForm() {
+            var form = document.getElementById('form-tambah-form-baru');
+            if (!form.checkValidity()) {
+                form.reportValidity(); // munculkan pesan required
+                return; // STOP submit
+            }
+
+            $('#btn-submit').html('<button type="button" class="btn btn-primary" disabled>Memproses...</button>'); // ubah tombol dengan versi disabled
+            form.submit();
+        }
 
         
     </script>

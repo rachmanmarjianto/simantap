@@ -437,7 +437,7 @@ class ProsesMaintenanceController extends Controller
         foreach($isi_template as $el){
             $jenis_maintenance = $el->jenis_maintenance;
             if($el->level == 1){
-                if(!key_exists($el->idmaintenance_aset, $layout)){
+                if(!key_exists($el->idisi_template, $layout)){
                     $layout[$el->idisi_template] = array(
                         'idisi_template' => $el->idisi_template,
                         'jenis_isi' => $el->jenis_isi,

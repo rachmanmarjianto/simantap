@@ -83,7 +83,7 @@ class LayananController extends Controller
 								->where('e.idaplikasi_uk', $req->idaplikasi)
 								->where('au.status', 1)
 								->where('e.status', 1)
-								->select('e.link')
+								->select('e.link', 'e.id_auth_type', 'e.idendpoint')
 								->first();
 		} catch (\Exception $e) {
 			return response()->json([
@@ -104,21 +104,52 @@ class LayananController extends Controller
 				'data' => null
 			], 200); //sengaja di kasih 200, kalo ndak larinya ke yg error dan ndak bisa diambil response message nya. ya aku msh blm tau carane, so little time too much to do boyy....
 		}
+
+		//basic auth
+		if($api_layanan->id_auth_type == 1) {
+			$nilai_komponen = DB::table('nilai_komponen_auth')
+							->where('idendpoint', $api_layanan->idendpoint)
+							->get();
+
+			$token = base64_encode($nilai_komponen[0]->nilai.':'.$nilai_komponen[1]->nilai);
+		}
+		else{
+			$token = null;
+			//kalo ndak ada auth type nya, token di set null aja, siapa tau nanti ada jenis auth lain yang butuh token tapi formatnya beda, jd ndak bisa langsung diambil dari db kaya basic auth
+		}
 		
 		
 		try {
 			$curl = curl_init();
 
-			curl_setopt_array($curl, array(
-				CURLOPT_URL => $api_layanan->link,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_ENCODING => '',
-				CURLOPT_MAXREDIRS => 10,
-				CURLOPT_TIMEOUT => 0,
-				CURLOPT_FOLLOWLOCATION => true,
-				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-				CURLOPT_CUSTOMREQUEST => 'GET',
-			));
+			if($api_layanan->id_auth_type == 0) {
+				curl_setopt_array($curl, array(
+					CURLOPT_URL => $api_layanan->link,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_ENCODING => '',
+					CURLOPT_MAXREDIRS => 10,
+					CURLOPT_TIMEOUT => 0,
+					CURLOPT_FOLLOWLOCATION => true,
+					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					CURLOPT_CUSTOMREQUEST => 'GET',
+				));
+			}
+			//sementara utk basic dulu (auth_type 1), kalo mau nambahin auth type lain tinggal tambahin else if disini ya
+			else{
+				curl_setopt_array($curl, array(
+					CURLOPT_URL => $api_layanan->link,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_ENCODING => '',
+					CURLOPT_MAXREDIRS => 10,
+					CURLOPT_TIMEOUT => 0,
+					CURLOPT_FOLLOWLOCATION => true,
+					CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+					CURLOPT_CUSTOMREQUEST => 'GET',
+					CURLOPT_HTTPHEADER => array(
+						'Authorization: Basic '.$token
+					),
+				));
+			}
 
 			$response = curl_exec($curl);
 

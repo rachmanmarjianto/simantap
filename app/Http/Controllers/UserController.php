@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Validator;
+use App\Services\Simantap_service;
 
 class UserController extends Controller
 {
@@ -492,11 +494,21 @@ class UserController extends Controller
 
 	public function tambahroleuser(Request $req){
 		// dd($req->all());
+		$validated = $req->validate([
+            'iduser' => 'required|integer',
+			'idrole' => 'required|integer',
+			'idunitkerja' => 'required|integer',
+        ]);
+
+		$iduser = $validated['iduser'];
+		$idrole = $validated['idrole'];
+		$idunitkerja = $validated['idunitkerja'];
+
 
 		$cek = DB::table('role_user')
-					->where('iduser', $req->iduser)
-					->where('idrole', $req->idrole)
-					->where('idunit_kerja', $req->idunitkerja)
+					->where('iduser', $iduser)
+					->where('idrole', $idrole)
+					->where('idunit_kerja', $idunitkerja)
 					->exists();
 
 		if ($cek) {
@@ -507,22 +519,33 @@ class UserController extends Controller
 			]);
 		}
 
+		$simantapService = new Simantap_service();
+		$cekunit_kerja = $simantapService->cek_unit_kerja($idunitkerja);
+
+		if($cekunit_kerja['code'] !== 200){
+			return response()->json([
+				'code' => 400,
+				'status' => 'error',
+				'message' => $cekunit_kerja['message']
+			]);
+		}		
+
 		date_default_timezone_set('Asia/Jakarta');
 		$ts = date('Y-m-d H:i:s');
 
 		DB::beginTransaction();
 		try {
 			DB::table('role_user')
-				->where('iduser', $req->iduser)
+				->where('iduser', $iduser)
 				->update([
 					'status' => 0,
 				]);
 
 			DB::table('role_user')
 				->insert([
-					'iduser' => $req->iduser,
-					'idrole' => $req->idrole,
-					'idunit_kerja' => $req->idunitkerja,
+					'iduser' => $iduser,
+					'idrole' => $idrole,
+					'idunit_kerja' => $idunitkerja,
 					'status' => 1,
 					'created_at' => $ts,
 				]);

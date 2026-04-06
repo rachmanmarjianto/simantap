@@ -33,10 +33,13 @@
 				<div class="row">
 					<div class="col-12">
 						<div class="card">							
-							<div class="card-header" style="text-align: right">
-								<div class="row">
-									<div class="col-12">
-										<button type="button" class="btn btn-success float-right">Success</button>
+							<div class="card-header">
+								<div class="d-flex justify-content-between align-items-center w-100">
+									<div class="flex-grow-1">
+										
+									</div>
+									<div>
+										<button class="btn btn-rounded btn-success float-right" onclick="penelitianbaru()">Buat Ajuan Penelitian Baru</button>
 									</div>
 								</div>
 								
@@ -47,11 +50,65 @@
 										<thead>
 											<tr>
 												<th>ID Penelitian</th>
-
+												<th>Topik</th>
+												<th>Dosen Pembimbing</th>
+												<th>unit / Fakultas<br>Pengelola</th>
+												<th>Lab</th>
+												<th>Status Ajuan</th>
+												<th>Aksi</th>
 											</tr>
 										</thead>
 										<tbody>
-											
+											@foreach($list_ajuan_penelitian as $ajuan)
+												@php
+													if($ajuan->status_ajuan == 1){
+														$ajuan->status_ajuan = 'draft';
+														$warna = 'orange';
+													}
+													else if($ajuan->status_ajuan == 2){
+														$ajuan->status_ajuan = 'Menunggu Verif DosPem';
+														$warna = 'blue';
+													}
+													else if($ajuan->status_ajuan == 3){
+														$ajuan->status_ajuan = 'Menunggu Verif PJ Ruang';
+														$warna = 'blue';
+													}
+													else if($ajuan->status_ajuan == 4){
+														$ajuan->status_ajuan = 'Diizinkan';
+														$warna = 'green';
+													}
+													else if($ajuan->status_ajuan == 5){
+														$ajuan->status_ajuan = 'Ditolak';
+														$warna = 'red';
+													}
+													else if($ajuan->status_ajuan == 6){
+														$ajuan->status_ajuan = 'Dibatalkan';
+														$warna = 'grey';
+													}
+													else{
+														$ajuan->status_ajuan = 'Tidak Diketahui';
+														$warna = 'black';
+													}
+												@endphp
+
+												<tr>
+													<td>{{ $ajuan->idpenelitian }}</td>
+													<td>{{ $ajuan->topik }}</td>
+													<td>{{ $ajuan->dosen_pembimbing ? $ajuan->gelar_depan . ' ' . $ajuan->dosen_pembimbing . ', ' . $ajuan->gelar_belakang : '-' }}</td>
+													<td>{{ $ajuan->unit_kerja }}</td>
+													<td>
+														@if(isset($lab_digunakan[$ajuan->idpenelitian]))
+															{{ implode(', ', $lab_digunakan[$ajuan->idpenelitian]) }}
+														@else
+															-
+														@endif
+													</td>
+													<td><span style="color:{{ $warna }}">{{ $ajuan->status_ajuan }}</span></td>
+													<td>
+														<a href="{{ route('penelitian_mhs_show', ['id' => Crypt::encrypt($ajuan->idpenelitian)]) }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+													</td>
+												</tr>
+											@endforeach
 										</tbody>
 									</table>
 								</div>
@@ -61,8 +118,28 @@
 				</div>
 			</div>
 		</div>
+
+		<form method="get" action="{{ route('penelitian_mhs_create') }}" id="form_penelitian_baru" style="display: none;">
+		</form>
 @endsection
 
 @section('javascript')
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+	<script>
+		function penelitianbaru(){
+			Swal.fire({
+				title: 'Apakah Anda yakin?',
+				text: "Anda akan membuat ajuan penelitian baru.",
+				icon: 'question',
+				showCancelButton: true,
+				confirmButtonText: 'Ya, lanjutkan',
+				cancelButtonText: 'Batal'
+			}).then((result) => {
+				if (result.isConfirmed) {
+					document.getElementById('form_penelitian_baru').submit();
+				}
+			});
+		}
+	</script>
 @endsection

@@ -69,6 +69,8 @@ Route::middleware(['akses:1,2'])->group(function () {
 	Route::post('/apiaplikasi/simpanaplikasi', [ApiAplikasiController::class, 'simpan_aplikasi'])->name('api_aplikasi_store');
 	Route::post('/apiaplikasi/simpan_tambah_endpoint', [ApiAplikasiController::class, 'simpan_tambah_endpoint'])->name('api_aplikasi_tambah_endpoint');
 	Route::post('/apiaplikasi/set_status_endpoint', [ApiAplikasiController::class, 'set_status_endpoint'])->name('api_aplikasi_set_status_endpoint');
+	Route::post('/apiaplikasi/get_endpoint_detail', [ApiAplikasiController::class, 'get_endpoint_detail'])->name('api_aplikasi_get_endpoint_detail');
+	Route::post('/apiaplikasi/edit_endpoint', [ApiAplikasiController::class, 'edit_endpoint'])->name('api_aplikasi_edit_endpoint');
 
 	$tmp_prefix = 'fakultas';
 	Route::get('/'.$tmp_prefix.'/', [FakultasController::class, 'index'])->name($tmp_prefix.'_index');
@@ -230,9 +232,9 @@ Route::middleware(['akses:1,2,4'])->group(function () {
 
 	Route::get('/penelitian_master/', [PenelitianMasterController::class, 'index'])->name('penelitian_master_index');
 
-	Route::get('/penelitian/', [PenelitianController::class, 'index'])->name('penelitian_admin_index');
+	Route::get('/penelitian_admin/', [PenelitianController::class, 'index'])->name('penelitian_admin_index');
 
-	Route::get('/praktikum/', [PraktikumController::class, 'index'])->name('praktikum_index');
+	Route::get('/praktikum_admin/', [PraktikumController::class, 'index'])->name('praktikum_admin_index');
 
 	Route::get('/form_maintenance/', [FormMaintenanceController::class, 'index'])->name('form_maintenance_index');
 	Route::get('/form_maintenance/unit_kerja/{id}', [FormMaintenanceController::class, 'detail_unit_kerja'])->name('form_maintenance_unit_kerja');

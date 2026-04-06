@@ -18,9 +18,16 @@ class HomeController extends Controller
 		$menu = 'home';
 		$submenu = '';
 
-		$response = Http::get('https://zenquotes.io/api/today');
-		$quote = $response->json()[0]['q'] ?? 'Stay inspired!';
-		$author = $response->json()[0]['a'] ?? 'Anonymous';
+		try {
+			$response = Http::get('https://zenquotes.io/api/today');
+			$quote = $response->json()[0]['q'] ?? 'Stay inspired!';
+			$author = $response->json()[0]['a'] ?? 'Anonymous';
+		} catch (\Exception $e) {
+			$response = null;
+			$quote = 'Stay inspired!';
+			$author = 'Anonymous';
+		}
+		
 
 		// dd($quote, $author);
 

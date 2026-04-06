@@ -50,7 +50,7 @@
 							<div class="card-body">
 								
 								<div class="form-group row">
-									<label class="col-sm-3 col-form-label">Nama Aplikasi</label>
+									<label class="col-sm-3 col-form-label">Nama Endpoint</label>
 									<div class="col-sm-9">
 										<input type="text" class="form-control" readonly value="{{ $aplikasi->nama_aplikasi }}">
 									</div>
@@ -89,16 +89,23 @@
                                                 <th>Method</th>
                                                 <th>URL</th>
                                                 <th>Jenis Endpoint</th>
+												<th>Auth Type</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($api_aplikasi as $api)
 												<tr>
-													<td>{{ $api->nama_endpoint }}</td>
+													<td>
+														<div class="d-flex align-items-center gap-2">
+															{{ $api->nama_endpoint }}
+															<i class="fa fa-wrench" style="font-size:15px; color:blue; cursor:pointer" title="Edit" onclick="editEndpoint({{ $api->idendpoint }}, this)"></i>
+														</div>
+													</td>
 													<td>{{ $api->method }}</td>
 													<td>{{ $api->link }}</td>
 													<td>{{ $api->nama_jenis_endpoint }}</td>
+													<td>{{ $api->nama_auth ?? 'None' }}</td>
 													<td id="status-{{ $api->idendpoint }}">
 														@if($api->status_endpoint == 1)
 															<span class="badge badge-success" style="cursor:pointer" onclick="ubahstatus({{ $api->idendpoint }}, {{ $api->idaplikasi_uk }}, {{ $api->idjenis_endpoint }}, 0)">Aktif</span>
@@ -130,6 +137,7 @@
 						<form method="POST" action="{{ route('api_aplikasi_tambah_endpoint') }}" id="formtambahep">
 							@csrf
 							<input type="hidden" name="idaplikasi" value="{{ $aplikasi->idaplikasi_uk }}">
+							<input type="hidden" name="idendpoint">
 							<div class="form-group row">
 								<label class="col-sm-3 col-form-label">Nama Endpoint</label>
 								<div class="col-sm-9">
@@ -145,6 +153,7 @@
 									</select>
 								</div>
 							</div>
+							
 							<div class="form-group row">
 								<label class="col-sm-3 col-form-label">URL</label>
 								<div class="col-sm-9">
@@ -161,6 +170,20 @@
 									</select>
 								</div>
 							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">Auth Type</label>
+								<div class="col-sm-9">
+									<select class="form-control" name="auth_type" onchange="getAuthTypeDetails(this.value)" required>
+										<option value="0">None</option>
+										@foreach($auth_type as $key => $at)
+											<option value="{{ $key }}">{{ $at }}</option>
+										@endforeach
+									</select>
+								</div>
+							</div>
+							<div id="auth_type_details">
+							
+							</div>
 						</form>
 					</div>
 					<div class="modal-footer">
@@ -170,11 +193,81 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true" id="mdl_edit_endpoint">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Edit Endpoint</h5>
+						<button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form method="POST" action="{{ route('api_aplikasi_edit_endpoint') }}" id="formeditendpoint">
+							@csrf
+							<input type="hidden" name="idaplikasi" value="{{ $aplikasi->idaplikasi_uk }}">
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">Nama Endpoint</label>
+								<div class="col-sm-9">
+									<input type="text" class="form-control" name="nama_endpoint" placeholder="Nama Endpoint" required>
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">Method</label>
+								<div class="col-sm-9">
+									<select class="form-control" name="method" required>
+										<option value="GET">GET</option>
+										<option value="POST">POST</option>
+									</select>
+								</div>
+							</div>
+							
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">URL</label>
+								<div class="col-sm-9">
+									<input type="text" class="form-control" name="link" placeholder="URL Endpoint" required>
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">Jenis Endpoint</label>
+								<div class="col-sm-9">
+									<select class="form-control" name="jenis_endpoint" required>
+										@foreach($jenis_endpoint as $je)
+											<option value="{{ $je->idjenis_endpoint }}">{{ $je->nama_jenis_endpoint }}</option>
+										@endforeach
+									</select>
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-3 col-form-label">Auth Type</label>
+								<div class="col-sm-9">
+									<select class="form-control" name="auth_type" onchange="getAuthTypeDetails(this.value, true)" required>
+										<option value="0">None</option>
+										@foreach($auth_type as $key => $at)
+											<option value="{{ $key }}">{{ $at }}</option>
+										@endforeach
+									</select>
+								</div>
+							</div>
+							<div id="auth_type_details_edit_endpoint">
+								
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary" onclick="$('#formeditendpoint').submit()">Edit</button>
+					</div>
+				</div>
+			</div>
+		</div>
 @endsection
 
 @section('javascript')
 
 	<script>
+		var komponen_auth = @json($auth_komponen);
+
 		function tambahep(){
 			$('#mdl_tambah_endpoint').modal('show');
 		}
@@ -205,6 +298,74 @@
 				error: function(xhr) {
 					$('#' + id).html('<span class="badge badge-' + (status == 0 ? 'success' : 'danger') + '" style="cursor:pointer" onclick="ubahstatus(' + idendpoint + ', '+ idaplikasi_uk + ', '+ idjenis_endpoint + ', ' + status + ')">' + (status == 0 ? 'Aktif' : 'Non Aktif') + '</span>');
 					alert('Error: ' + xhr.responseText);
+				}
+			});
+		}
+
+		function getAuthTypeDetails(authTypeId, isEdit = false) {
+			var detailsContainer = isEdit ? $('#auth_type_details_edit_endpoint') : $('#auth_type_details');
+			detailsContainer.empty();
+
+			if (authTypeId != 0 && komponen_auth[authTypeId]) {
+				var components = komponen_auth[authTypeId];
+				var html = '';
+				components.forEach(function(component) {
+					html += `<div class="form-group row">
+									<label class="col-sm-3 col-form-label">${component.nama_komponen_auth}</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" name="komponen_auth[${component.idkomponen_auth}]" required>
+									</div>
+								</div>`;
+				});
+				detailsContainer.append(html);
+			}
+		}
+
+		function editEndpoint(idendpoint, el) {
+			$(el).attr('class', 'fa fa-spinner fa-spin');
+			$.ajax({
+				url: "{{ route('api_aplikasi_get_endpoint_detail') }}",
+				type: "POST",
+				data: {
+					_token: '{{ csrf_token() }}',
+					idendpoint: idendpoint
+				},
+				success: function(response) {
+					console.log(response);
+					if (response.code == 200) {
+						var endpoint = response.data;
+						$('#formeditendpoint input[name="nama_endpoint"]').val(endpoint.nama_endpoint);
+						$('#formeditendpoint select[name="method"]').val(endpoint.method).selectpicker('refresh');;
+						$('#formeditendpoint input[name="link"]').val(endpoint.link);
+						$('#formeditendpoint select[name="jenis_endpoint"]').val(endpoint.idjenis_endpoint).selectpicker('refresh');;
+						$('#formeditendpoint select[name="auth_type"]').val(endpoint.id_auth_type).selectpicker('refresh');;
+						$('#formeditendpoint input[name="idaplikasi"]').val(endpoint.idaplikasi_uk);
+						$('#formeditendpoint').append('<input type="hidden" name="idendpoint" value="' + endpoint.idendpoint + '">');
+						$('#formtambahep input[name="idendpoint"]').val(idendpoint);
+
+						var html = '';
+						if (endpoint.komponen_auth) {
+							endpoint.komponen_auth.forEach(function(component, index) {
+								html += `<div class="form-group row">
+												<label class="col-sm-3 col-form-label">${component.nama_komponen_auth}</label>
+												<div class="col-sm-9">
+													<input type="text" class="form-control" name="komponen_auth[${component.idkomponen_auth}]" value="${component.nilai}" required>
+												</div>
+											</div>`;
+							});
+							$('#auth_type_details_edit_endpoint').html(html);
+						}
+
+						$('#mdl_edit_endpoint').modal('show');
+					} else {
+						alert(response.message);
+					}
+
+					$(el).attr('class', 'fa fa-wrench').css('color', 'blue');
+				},
+				error: function(xhr) {
+					alert('Error: ' + xhr.responseText);
+					$(el).attr('class', 'fa fa-wrench').css('color', 'blue');
 				}
 			});
 		}

@@ -100,6 +100,7 @@ class LayananOperatorController extends Controller
 						->select('l.nama_layanan', 'l.idlayanan', DB::raw('COUNT(ol.idoperator_layanan) as jumlah_operator'))
 						->groupBy('l.nama_layanan', 'l.idlayanan')
 						->orderBy('l.nama_layanan', 'asc')
+						->where('l.idunit_kerja', $idunitkerja)
 						->get();
 
 		// dd($layanan);
@@ -118,8 +119,14 @@ class LayananOperatorController extends Controller
 
 		$layanan = DB::table('layanan as l')
 					->where('l.idlayanan', $idlayanan)
+					->where('l.idunit_kerja', $iduk)
 					->select('l.nama_layanan', 'l.idlayanan')
 					->first();
+
+
+		if(!$layanan){
+			return abort(403, 'Forbidden Access');
+		}
 
 		$operator = DB::table('role_user as ru')
 						->join('user as u', 'ru.iduser', '=', 'u.iduser')

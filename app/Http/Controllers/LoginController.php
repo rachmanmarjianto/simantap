@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
+use App\Services\Simantap_service;
 
 class LoginController extends Controller
 {
@@ -17,10 +18,32 @@ class LoginController extends Controller
 	}
 
 	public function masuk(Request $request){
-		$validatedData = $request->validate([
-			'username' => ['required', 'integer', 'min:0'],
-			'password' => ['required', 'min:4', 'max:255'],
-		]);
+		$validator = \Validator::make($request->all(), [
+            'username' => 'required|numeric',
+            'password' => 'required|string|max:255',
+            'captcha' => 'required|captcha',
+        ]);
+
+		if ($validator->fails()) {
+            // return redirect()->back()->withErrors($validator)->withInput();
+            $errors = $validator->errors()->messages(); // Mendapatkan semua error dalam bentuk array
+            $errorCodes = $validator->failed(); // Mendapatkan kode validasi yang gagal
+
+            // dd($errors, $errorCodes);
+
+            if(isset($errors['captcha'])){
+                return redirect()->back()->with([
+                        'status' => 'danger',
+                        'message' => 'Captcha tidak sesuai. Silakan coba lagi.'
+                    ]);
+            }
+            else{
+                return redirect()->back()->with([
+                        'status' => 'danger',
+                        'message' => 'NIP/NIM atau Password salah'
+                    ]);
+            }
+        }
 
 		date_default_timezone_set('Asia/Jakarta');
 		$ts = date('Y-m-d H:i:s');
@@ -36,7 +59,7 @@ class LoginController extends Controller
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS => array('LoginForm[username]' => $validatedData['username'],'LoginForm[password]' => $validatedData['password']),
+			CURLOPT_POSTFIELDS => array('LoginForm[username]' => $validator->validated()['username'],'LoginForm[password]' => $validator->validated()['password']),
 			CURLOPT_HTTPHEADER => array(
 				'Cookie: _csrf=26f508d094ffac1a03420541815ba6e835e252bb34be156d7d8f1ef8f1606851a%3A2%3A%7Bi%3A0%3Bs%3A5%3A%22_csrf%22%3Bi%3A1%3Bs%3A32%3A%22ZdzFGZeNiCJDeA_Wiln4ldOl3rwa39rT%22%3B%7D; uacc-session=fvgeqjors9i2pqte2ibh4vpjmm'
 			),
@@ -48,8 +71,6 @@ class LoginController extends Controller
 		
 		$result = json_decode($response, true);
 
-		// dd($result);
-
 		if(isset($result['status']) && $result['status'] == 'success'){
 			// Proses login berhasil
 			$pengguna = User::select('user.*', 'role_user.idrole', 'role.nama_role', 'uk.nm_unit_kerja', 'role_user.idunit_kerja', 'uks.layanan', 'uks.penelitian', 'uks.praktikum')
@@ -57,10 +78,12 @@ class LoginController extends Controller
 				->join('role', 'role_user.idrole', '=', 'role.idrole')
 				->join('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
 				->join('unit_kerja_simantap as uks', 'role_user.idunit_kerja', '=', 'uks.idunit_kerja_simantap')
-				->where('user.nipnik', $validatedData['username'])
+				->where('user.nipnik', $validator->validated()['username'])
 				->where('role_user.status', 't')
 				->where('role_user.is_delete', 0)
 				->first();
+
+			// dd($validator->validated(),$pengguna);
 				
 			if ($pengguna)
 			{
@@ -74,7 +97,7 @@ class LoginController extends Controller
 				// ]);
 
 				$user = DB::table('aucc.pengguna as p')
-								->where('p.username', $validatedData['username'])
+								->where('p.username', $validator->validated()['username'])
 								->select('p.id_pengguna', 'p.username as nipnik', 'p.nm_pengguna', 'p.gelar_depan', 'p.gelar_belakang', 'p.join_table')
 								->first();
 
@@ -103,7 +126,7 @@ class LoginController extends Controller
 				}
 
 				$user_insert = array(
-						'nipnik' => $validatedData['username'],
+						'nipnik' => $validator->validated()['username'],
 						'nama' => $result['data']['name'],
 						'gelar_depan' => $result['data']['gelar_depan'] ?? '',
 						'gelar_belakang' => $result['data']['gelar_belakang'] ?? '',
@@ -114,6 +137,16 @@ class LoginController extends Controller
 						'internal' => 'true',
 						'idprogram_studi' => $idprogram_studi,
 					);
+				
+				$simantapService = new Simantap_service();
+				$cekunit_kerja = $simantapService->cek_unit_kerja($idunitkerja);
+
+				if($cekunit_kerja['code'] !== 200){
+					return redirect()->back()->with([
+						'status' => 'danger',
+						'message' => $cekunit_kerja['message']
+					]);
+				}
 
 				try {
 					DB::beginTransaction();
@@ -144,7 +177,7 @@ class LoginController extends Controller
 								->join('role', 'role_user.idrole', '=', 'role.idrole')
 								->join('aucc.unit_kerja as uk', 'role_user.idunit_kerja', '=', 'uk.id_unit_kerja')
 								->join('unit_kerja_simantap as uks', 'role_user.idunit_kerja', '=', 'uks.idunit_kerja_simantap')
-								->where('user.nipnik', $validatedData['username'])
+								->where('user.nipnik', $validator->validated()['username'])
 								->where('role_user.status', 't')
 								->where('role_user.is_delete', 0)
 								->first();	
