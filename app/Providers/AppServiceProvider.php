@@ -12,7 +12,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Services\Simantap_service::class, function ($app) {
+            return new \App\Services\Simantap_service();
+        });
+
+        $this->app->singleton(\App\Services\File_service::class, function ($app) {
+            return new \App\Services\File_service();
+        });
     }
 
     /**
