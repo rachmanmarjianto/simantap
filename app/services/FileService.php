@@ -5,7 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
-class File_service
+class FileService
 {
     public function get_file($idfile, $tipe_kegiatan){
 

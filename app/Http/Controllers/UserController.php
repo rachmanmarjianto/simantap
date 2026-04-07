@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Services\Simantap_service;
+use App\Services\SimantapService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
@@ -520,7 +520,7 @@ class UserController extends Controller
 			]);
 		}
 
-		$simantapService = new Simantap_service();
+		$simantapService = new SimantapService();
 		$cekunit_kerja = $simantapService->cek_unit_kerja($idunitkerja);
 
 		if($cekunit_kerja['code'] !== 200){

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class UACC_service
+class UACCService
 {
     public function cari_civitas_akademik(string $nipnik, int $join_table){
 

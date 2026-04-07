@@ -3,7 +3,7 @@
 namespace App\Services;
 use Illuminate\Support\Facades\DB;
 
-class Simantap_service
+class SimantapService
 {
     public function cek_unit_kerja($idunitkerja){
         $cekunit_kerja = DB::table('unit_kerja_simantap')

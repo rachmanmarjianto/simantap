@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Session;
-use App\Services\Simantap_service;
+use App\Services\SimantapService;
 
 class LoginController extends Controller
 {
@@ -138,7 +138,7 @@ class LoginController extends Controller
 						'idprogram_studi' => $idprogram_studi,
 					);
 				
-				$simantapService = new Simantap_service();
+				$simantapService = new SimantapService();
 				$cekunit_kerja = $simantapService->cek_unit_kerja($idunitkerja);
 
 				if($cekunit_kerja['code'] !== 200){

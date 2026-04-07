@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
-use App\Services\UACC_service;
+use App\Services\UACCService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
-use App\Services\File_service;
+use App\Services\FileService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 
@@ -718,7 +718,7 @@ class PenelitianMahasiswaController extends Controller
 
         $nip = $validated['nip'];
 
-        $uacc = new UACC_service();
+        $uacc = new UACCService();
         $dosen = $uacc->cari_civitas_akademik($nip, 2);
 
         if($dosen['code'] != 200){
@@ -1130,14 +1130,14 @@ class PenelitianMahasiswaController extends Controller
     public function download_dokumen($id){
         $id = Crypt::decrypt($id);
 
-        $file = new File_service();
+        $file = new FileService();
         return $file->get_file($id, 'penelitian');
     }
 
     public function hapus_dokumen($id){
         $id = Crypt::decrypt($id);
 
-        $file = new File_service();
+        $file = new FileService();
         return $file->hapus_file($id, 'penelitian');
         
     }
