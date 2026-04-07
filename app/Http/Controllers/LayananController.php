@@ -34,6 +34,7 @@ class LayananController extends Controller
 							->leftJoin('layanan as l', 'uk.id_unit_kerja', '=', 'l.idunit_kerja')
 							->select('uk.nm_unit_kerja', 'q1.idunit_kerja', DB::raw('COUNT(l.idlayanan) as jumlah_layanan'))
 							->groupBy('uk.nm_unit_kerja', 'q1.idunit_kerja')
+							->where('q1.idunit_kerja', session('userdata')['idunit_kerja'])
 							->get();
 		}
 		
